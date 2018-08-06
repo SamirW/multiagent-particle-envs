@@ -4,6 +4,9 @@ from multiagent.scenario import BaseScenario
 
 
 class Scenario(BaseScenario):
+    agt_pos = []
+    lndmrk_pos = []
+
     def make_world(self):
         world = World()
         # set any world properties first
@@ -25,6 +28,10 @@ class Scenario(BaseScenario):
             landmark.collide = False
             landmark.movable = False
         # make initial conditions
+        for agent in world.agents:
+            self.agt_pos.append(np.random.uniform(-1, +1, world.dim_p))
+        for landmark in world.landmarks:
+            self.lndmrk_pos.append(np.random.uniform(-1, +1, world.dim_p))
         self.reset_world(world)
         return world
 
@@ -36,13 +43,15 @@ class Scenario(BaseScenario):
         for i, landmark in enumerate(world.landmarks):
             landmark.color = np.array([0.25, 0.25, 0.25])
         # set random initial states
-        for agent in world.agents:
-            agent.state.p_pos = np.random.uniform(-1, +1, world.dim_p)
+        for i, agent in enumerate(world.agents):
+            #agent.state.p_pos = np.random.uniform(-1, +1, world.dim_p)
+            agent.state.p_pos = np.copy(self.agt_pos[i])
             agent.state.p_vel = np.zeros(world.dim_p)
             agent.state.c = np.zeros(world.dim_c)
             agent.done = False
         for i, landmark in enumerate(world.landmarks):
-            landmark.state.p_pos = np.random.uniform(-1, +1, world.dim_p)
+            #landmark.state.p_pos = np.random.uniform(-1, +1, world.dim_p)
+            landmark.state.p_pos = np.copy(self.lndmrk_pos[i])
             landmark.state.p_vel = np.zeros(world.dim_p)
 
     def benchmark_data(self, agent, world):
