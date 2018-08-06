@@ -4,8 +4,8 @@ from multiagent.scenario import BaseScenario
 
 
 class Scenario(BaseScenario):
-    agt_pos = []
-    lndmrk_pos = []
+    agt_pos = [[0.5, 0.5], [-0.25, 0.75], [0.0, -0.5]]
+    lndmrk_pos = [[-0.25, 0.25], [0.0, 0.0], [0.75, -0.25]]
 
     def make_world(self):
         world = World()
@@ -28,10 +28,6 @@ class Scenario(BaseScenario):
             landmark.collide = False
             landmark.movable = False
         # make initial conditions
-        for agent in world.agents:
-            self.agt_pos.append(np.random.uniform(-1, +1, world.dim_p))
-        for landmark in world.landmarks:
-            self.lndmrk_pos.append(np.random.uniform(-1, +1, world.dim_p))
         self.reset_world(world)
         return world
 
