@@ -233,7 +233,7 @@ class World(object):
         force_y = force_y[np.nonzero(force_y)]
 
         force_x = force_x[0] if force_x.size !=0 else 0
-        force_y = force_y[0] if force_y.size !=0 else 0
+        force_y = -force_y[0] if force_y.size !=0 else 0
 
         force = [force_x, force_y]
 
