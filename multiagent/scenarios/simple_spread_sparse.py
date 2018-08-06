@@ -5,14 +5,14 @@ from multiagent.scenario import BaseScenario
 
 class Scenario(BaseScenario):
     agt_pos = [[0.5, 0.5], [-0.25, 0.75], [0.0, -0.5]]
-    lndmrk_pos = [[-0.25, 0.25], [0.0, 0.0], [0.75, -0.25]]
+    lndmrk_pos = [[-0.25, 0.25], [0.0, -0.75], [0.75, -0.25]]
 
     def make_world(self):
         world = World()
         # set any world properties first
         world.dim_c = 2
-        num_agents = 1
-        num_landmarks = 1
+        num_agents = 2
+        num_landmarks = 2
         world.collaborative = True
         # add agents
         world.agents = [Agent() for i in range(num_agents)]
@@ -84,10 +84,10 @@ class Scenario(BaseScenario):
             #dists = [np.sqrt(np.sum(np.square(a.state.p_pos - l.state.p_pos))) for a in world.agents]
             #rew -= min(dists)
         
-        if agent.collide:
-            for a in world.agents:
-                if self.is_collision(a, agent):
-                    rew -= 1
+        #if agent.collide:
+        #    for a in world.agents:
+        #        if self.is_collision(a, agent):
+        #            rew -= 1
 
         if self.all_done(world):
             rew += 1
@@ -97,7 +97,7 @@ class Scenario(BaseScenario):
     def done(self, agent, world):
         # Agents are marked done when they are within a certain range of a landmark
         dists = [np.sqrt(np.sum(np.square(agent.state.p_pos - l.state.p_pos))) for l in world.landmarks]
-        if min(dists) < 0.10:
+        if min(dists) < agent.size:
             agent.state.done = True
             return True
         return False
