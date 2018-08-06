@@ -91,8 +91,8 @@ class MultiAgentEnv(gym.Env):
         # record observation for each agent
         for agent in self.agents:
             obs_n.append(self._get_obs(agent))
-            reward_n.append(self._get_reward(agent))
             done_n.append(self._get_done(agent))
+            reward_n.append(self._get_reward(agent))
 
             info_n['n'].append(self._get_info(agent))
 
