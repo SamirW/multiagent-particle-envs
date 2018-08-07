@@ -11,7 +11,7 @@ class Scenario(BaseScenario):
         world = World()
         # set any world properties first
         world.dim_c = 2
-        num_agents = 2
+        num_agents = 2 
         num_landmarks = 2
         world.collaborative = True
         # add agents
@@ -40,14 +40,14 @@ class Scenario(BaseScenario):
             landmark.color = np.array([0.25, 0.25, 0.25])
         # set random initial states
         for i, agent in enumerate(world.agents):
-            #agent.state.p_pos = np.random.uniform(-1, +1, world.dim_p)
-            agent.state.p_pos = np.copy(self.agt_pos[i])
+            agent.state.p_pos = np.random.uniform(-1, +1, world.dim_p)
+            #agent.state.p_pos = np.copy(self.agt_pos[i])
             agent.state.p_vel = np.zeros(world.dim_p)
             agent.state.c = np.zeros(world.dim_c)
             agent.done = False
         for i, landmark in enumerate(world.landmarks):
-            #landmark.state.p_pos = np.random.uniform(-1, +1, world.dim_p)
-            landmark.state.p_pos = np.copy(self.lndmrk_pos[i])
+            landmark.state.p_pos = np.random.uniform(-1, +1, world.dim_p)
+            #landmark.state.p_pos = np.copy(self.lndmrk_pos[i])
             landmark.state.p_vel = np.zeros(world.dim_p)
 
     def benchmark_data(self, agent, world):
@@ -96,11 +96,12 @@ class Scenario(BaseScenario):
 
     def done(self, agent, world):
         # Agents are marked done when they are within a certain range of a landmark
-        dists = [np.sqrt(np.sum(np.square(agent.state.p_pos - l.state.p_pos))) for l in world.landmarks]
-        if min(dists) < (agent.size*3):
-            agent.state.done = True
-            return True
-        return False
+        #dists = [np.sqrt(np.sum(np.square(agent.state.p_pos - l.state.p_pos))) for l in world.landmarks]
+        #if min(dists) < agent.size:
+        #    return True
+        #return False
+
+        return self.all_done(agent, world)
 
     def observation(self, agent, world):
         # get positions of all entities in this agent's reference frame
@@ -127,7 +128,7 @@ class Scenario(BaseScenario):
         lndmrk_done = 0
         for l in world.landmarks:
             dists = [np.sqrt(np.sum(np.square(a.state.p_pos - l.state.p_pos))) for a in world.agents]
-            if min(dists) < (agent.size*3):
+            if min(dists) < agent.size:
                 lndmrk_done += 1
 
         if lndmrk_done == len(world.landmarks):
