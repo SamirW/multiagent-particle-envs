@@ -224,7 +224,7 @@ class World(object):
 
         k = self.contact_margin
         x_pen = np.logaddexp(0, -(x_dists - dist_min)/k)*k
-        y_pen = np.logaddexp(0, -(x_dists - dist_min)/k)*k
+        y_pen = np.logaddexp(0, -(y_dists - dist_min)/k)*k
 
         force_x = self.contact_force * x_delts / x_dists * x_pen
         force_y = self.contact_force * y_delts / y_dists * y_pen
@@ -233,7 +233,7 @@ class World(object):
         force_y = force_y[np.nonzero(force_y)]
 
         force_x = force_x[0] if force_x.size !=0 else 0
-        force_y = -force_y[0] if force_y.size !=0 else 0
+        force_y = force_y[0] if force_y.size !=0 else 0
 
         force = [force_x, force_y]
 

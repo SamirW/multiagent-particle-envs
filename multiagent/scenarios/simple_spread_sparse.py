@@ -89,7 +89,7 @@ class Scenario(BaseScenario):
         #        if self.is_collision(a, agent):
         #            rew -= 1
 
-        if self.all_done(world):
+        if self.all_done(agent, world):
             rew += 1
 
         return rew
@@ -97,7 +97,7 @@ class Scenario(BaseScenario):
     def done(self, agent, world):
         # Agents are marked done when they are within a certain range of a landmark
         dists = [np.sqrt(np.sum(np.square(agent.state.p_pos - l.state.p_pos))) for l in world.landmarks]
-        if min(dists) < agent.size:
+        if min(dists) < (agent.size*3):
             agent.state.done = True
             return True
         return False
@@ -120,7 +120,17 @@ class Scenario(BaseScenario):
             other_pos.append(other.state.p_pos - agent.state.p_pos)
         return np.concatenate([agent.state.p_vel] + [agent.state.p_pos] + entity_pos + other_pos + comm)
 
-    def all_done(self, world):
+    def all_done(self, agent, world):
         # Checks if all agents are done
-        dones = [self.done(a, world) for a in world.agents]
-        return all(dones)
+        #dones = [self.done(a, world) for a in world.agents]
+        #return all(dones)
+        lndmrk_done = 0
+        for l in world.landmarks:
+            dists = [np.sqrt(np.sum(np.square(a.state.p_pos - l.state.p_pos))) for a in world.agents]
+            if min(dists) < (agent.size*3):
+                lndmrk_done += 1
+
+        if lndmrk_done == len(world.landmarks):
+            return True
+  
+        return False
