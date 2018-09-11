@@ -4,9 +4,6 @@ from multiagent.scenario import BaseScenario
 
 
 class Scenario(BaseScenario):
-    agt_pos = [[0.5, 0.5], [-0.25, 0.75], [0.0, -0.5]]
-    lndmrk_pos = [[-0.25, 0.25], [0.0, -0.75], [0.75, -0.25]]
-
     def make_world(self):
         world = World()
         # set any world properties first
@@ -39,15 +36,12 @@ class Scenario(BaseScenario):
         for i, landmark in enumerate(world.landmarks):
             landmark.color = np.array([0.25, 0.25, 0.25])
         # set random initial states
-        for i, agent in enumerate(world.agents):
+        for agent in world.agents:
             agent.state.p_pos = np.random.uniform(-1, +1, world.dim_p)
-            #agent.state.p_pos = np.copy(self.agt_pos[i])
             agent.state.p_vel = np.zeros(world.dim_p)
             agent.state.c = np.zeros(world.dim_c)
-            agent.done = False
         for i, landmark in enumerate(world.landmarks):
             landmark.state.p_pos = np.random.uniform(-1, +1, world.dim_p)
-            #landmark.state.p_pos = np.copy(self.lndmrk_pos[i])
             landmark.state.p_vel = np.zeros(world.dim_p)
 
     def benchmark_data(self, agent, world):
@@ -70,8 +64,6 @@ class Scenario(BaseScenario):
 
 
     def is_collision(self, agent1, agent2):
-        if agent1 is agent2:
-            return False
         delta_pos = agent1.state.p_pos - agent2.state.p_pos
         dist = np.sqrt(np.sum(np.square(delta_pos)))
         dist_min = agent1.size + agent2.size
@@ -80,28 +72,16 @@ class Scenario(BaseScenario):
     def reward(self, agent, world):
         # Agents are rewarded based on minimum agent distance to each landmark, penalized for collisions
         rew = 0
-        #for l in world.landmarks:
-            #dists = [np.sqrt(np.sum(np.square(a.state.p_pos - l.state.p_pos))) for a in world.agents]
-            #rew -= min(dists)
-        
-        #if agent.collide:
-        #    for a in world.agents:
-        #        if self.is_collision(a, agent):
-        #            rew -= 1
-
-        if self.all_done(agent, world):
+        # for l in world.landmarks:
+            # dists = [np.sqrt(np.sum(np.square(a.state.p_pos - l.state.p_pos))) for a in world.agents]
+            # rew -= min(dists)
+        # if agent.collide:
+            # for a in world.agents:
+                # if self.is_collision(a, agent):
+                    # rew -= 1
+        if self.done(agent, world):
             rew += 1
-
         return rew
-
-    def done(self, agent, world):
-        # Agents are marked done when they are within a certain range of a landmark
-        #dists = [np.sqrt(np.sum(np.square(agent.state.p_pos - l.state.p_pos))) for l in world.landmarks]
-        #if min(dists) < agent.size:
-        #    return True
-        #return False
-
-        return self.all_done(agent, world)
 
     def observation(self, agent, world):
         # get positions of all entities in this agent's reference frame
@@ -121,11 +101,9 @@ class Scenario(BaseScenario):
             other_pos.append(other.state.p_pos - agent.state.p_pos)
         return np.concatenate([agent.state.p_vel] + [agent.state.p_pos] + entity_pos + other_pos + comm)
 
-    def all_done(self, agent, world):
-        # Checks if all agents are done
-        #dones = [self.done(a, world) for a in world.agents]
-        #return all(dones)
+    def done(self, agent, world):
         lndmrk_done = 0
+
         for l in world.landmarks:
             dists = [np.sqrt(np.sum(np.square(a.state.p_pos - l.state.p_pos))) for a in world.agents]
             if min(dists) < agent.size:
