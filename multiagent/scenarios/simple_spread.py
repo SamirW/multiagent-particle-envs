@@ -8,8 +8,8 @@ class Scenario(BaseScenario):
         world = World()
         # set any world properties first
         world.dim_c = 2
-        num_agents = 1
-        num_landmarks = 1
+        num_agents = 2
+        num_landmarks = 2
         world.collaborative = True
         # add agents
         world.agents = [Agent() for i in range(num_agents)]
@@ -17,7 +17,7 @@ class Scenario(BaseScenario):
             agent.name = 'agent %d' % i
             agent.collide = True
             agent.silent = True
-            agent.size = 0.15
+            agent.size = 0.05
         # add landmarks
         world.landmarks = [Landmark() for i in range(num_landmarks)]
         for i, landmark in enumerate(world.landmarks):
@@ -41,7 +41,7 @@ class Scenario(BaseScenario):
             agent.state.p_vel = np.zeros(world.dim_p)
             agent.state.c = np.zeros(world.dim_c)
         for i, landmark in enumerate(world.landmarks):
-            landmark.state.p_pos = np.random.uniform(-1, +1, world.dim_p)
+            landmark.state.p_pos = np.random.uniform(-0.9, +0.9, world.dim_p)
             landmark.state.p_vel = np.zeros(world.dim_p)
 
     def benchmark_data(self, agent, world):
@@ -75,12 +75,12 @@ class Scenario(BaseScenario):
         for l in world.landmarks:
             dists = [np.sqrt(np.sum(np.square(a.state.p_pos - l.state.p_pos))) for a in world.agents]
             rew -= min(dists)
-        if agent.collide:
-            for a in world.agents:
-                if self.is_collision(a, agent):
-                    rew -= 1
-        if self.done(agent, world):
-            rew += 100
+#        if agent.collide:
+#            for a in world.agents:
+#                if self.is_collision(a, agent):
+#                    rew -= 1
+#        if self.done(agent, world):
+#            rew += 100
         return rew
 
     def observation(self, agent, world):
@@ -106,7 +106,7 @@ class Scenario(BaseScenario):
 
         for l in world.landmarks:
             dists = [np.sqrt(np.sum(np.square(a.state.p_pos - l.state.p_pos))) for a in world.agents]
-            if min(dists) < agent.size:
+            if min(dists) < 1.5*agent.size:
                 lndmrk_done += 1
 
         if lndmrk_done == len(world.landmarks):
