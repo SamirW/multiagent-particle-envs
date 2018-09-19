@@ -2,6 +2,10 @@ import numpy as np
 from multiagent.core import World, Agent, Landmark
 from multiagent.scenario import BaseScenario
 
+COLORS = [np.array([0.35, 0.35, 0.85]), \
+            np.array([0.85, 0.35, 0.35]), \
+            np.array([0.35, 0.85, 0.35]), \
+            np.array([0.85, 0.85, 0.35])]
 
 class Scenario(BaseScenario):
     def make_world(self, num_agents=1, agent_size=0.15):
@@ -31,7 +35,8 @@ class Scenario(BaseScenario):
     def reset_world(self, world):
         # random properties for agents
         for i, agent in enumerate(world.agents):
-            agent.color = np.array([0.35, 0.35, 0.85])
+            # agent.color = np.array([0.35, 0.35, 0.85])
+            agent.color = COLORS[i]
         # random properties for landmarks
         for i, landmark in enumerate(world.landmarks):
             landmark.color = np.array([0.25, 0.25, 0.25])
@@ -43,6 +48,12 @@ class Scenario(BaseScenario):
         for i, landmark in enumerate(world.landmarks):
             landmark.state.p_pos = np.random.uniform(-0.9, +0.9, world.dim_p)
             landmark.state.p_vel = np.zeros(world.dim_p)
+        for i, landmark_1 in enumerate(world.landmarks):
+            for j, landmark_2 in enumerate(world.landmarks):
+                if i <= j:
+                    continue
+                if ((landmark_1.state.p_pos - landmark_2.state.p_pos)**2).sum() < (2.5*agent.size)**2:
+                    self.reset_world(world)
 
     def benchmark_data(self, agent, world):
         rew = 0
