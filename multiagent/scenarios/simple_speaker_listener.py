@@ -8,7 +8,6 @@ class Scenario(BaseScenario):
         # set any world properties first
         world.dim_c = 3
         num_landmarks = 3
-        world.collaborative = True
         # add agents
         world.agents = [Agent() for i in range(2)]
         for i, agent in enumerate(world.agents):
@@ -58,7 +57,7 @@ class Scenario(BaseScenario):
 
     def benchmark_data(self, agent, world):
         # returns data for benchmarking purposes
-        return self.reward(agent, reward)
+        return reward(agent, reward)
 
     def reward(self, agent, world):
         # squared distance from listener to landmark

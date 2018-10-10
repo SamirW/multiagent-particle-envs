@@ -2,26 +2,21 @@ import numpy as np
 from multiagent.core import World, Agent, Landmark
 from multiagent.scenario import BaseScenario
 
-COLORS = [np.array([0.35, 0.35, 0.85]), \
-            np.array([0.85, 0.35, 0.35]), \
-            np.array([0.35, 0.85, 0.35]), \
-            np.array([0.85, 0.85, 0.35])]
 
 class Scenario(BaseScenario):
-    def make_world(self, num_agents=1, agent_size=0.15):
+    def make_world(self):
         world = World()
         # set any world properties first
         world.dim_c = 2
-        num_agents = num_agents
-        num_landmarks = num_agents
-        world.collaborative = True
+        num_agents = 3
+        num_landmarks = 3
         # add agents
         world.agents = [Agent() for i in range(num_agents)]
         for i, agent in enumerate(world.agents):
             agent.name = 'agent %d' % i
             agent.collide = True
             agent.silent = True
-            agent.size = agent_size
+            agent.size = 0.15
         # add landmarks
         world.landmarks = [Landmark() for i in range(num_landmarks)]
         for i, landmark in enumerate(world.landmarks):
@@ -35,8 +30,7 @@ class Scenario(BaseScenario):
     def reset_world(self, world):
         # random properties for agents
         for i, agent in enumerate(world.agents):
-            # agent.color = np.array([0.35, 0.35, 0.85])
-            agent.color = COLORS[i]
+            agent.color = np.array([0.35, 0.35, 0.85])
         # random properties for landmarks
         for i, landmark in enumerate(world.landmarks):
             landmark.color = np.array([0.25, 0.25, 0.25])
@@ -46,14 +40,8 @@ class Scenario(BaseScenario):
             agent.state.p_vel = np.zeros(world.dim_p)
             agent.state.c = np.zeros(world.dim_c)
         for i, landmark in enumerate(world.landmarks):
-            landmark.state.p_pos = np.random.uniform(-0.9, +0.9, world.dim_p)
+            landmark.state.p_pos = np.random.uniform(-1, +1, world.dim_p)
             landmark.state.p_vel = np.zeros(world.dim_p)
-        for i, landmark_1 in enumerate(world.landmarks):
-            for j, landmark_2 in enumerate(world.landmarks):
-                if i <= j:
-                    continue
-                if ((landmark_1.state.p_pos - landmark_2.state.p_pos)**2).sum() < (2.5*agent.size)**2:
-                    self.reset_world(world)
 
     def benchmark_data(self, agent, world):
         rew = 0
@@ -109,16 +97,3 @@ class Scenario(BaseScenario):
             comm.append(other.state.c)
             other_pos.append(other.state.p_pos - agent.state.p_pos)
         return np.concatenate([agent.state.p_vel] + [agent.state.p_pos] + entity_pos + other_pos + comm)
-
-    def done(self, agent, world):
-        lndmrk_done = 0
-
-        for l in world.landmarks:
-            dists = [np.sqrt(np.sum(np.square(a.state.p_pos - l.state.p_pos))) for a in world.agents]
-            if min(dists) < 1.5*agent.size:
-                lndmrk_done += 1
-
-        if lndmrk_done == len(world.landmarks):
-            return True
-  
-        return False
