@@ -46,7 +46,7 @@ class Scenario(BaseScenario):
             agent.state.p_vel = np.zeros(world.dim_p)
             agent.state.c = np.zeros(world.dim_c)
         for i, landmark in enumerate(world.landmarks):
-            if i == flip:
+            if i == 0:
                 landmark.state.p_pos = np.random.uniform(-1, -0.5, world.dim_p)
             else:
                 landmark.state.p_pos = np.random.uniform(0.5, +1, world.dim_p)

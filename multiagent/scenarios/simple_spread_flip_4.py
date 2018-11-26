@@ -43,25 +43,35 @@ class Scenario(BaseScenario):
             landmark.color = np.array([0.25, 0.25, 0.25])
         # set random initial states
         for i, agent in enumerate(world.agents):
-            if i == 0:
-                agent.state.p_pos = np.random.uniform(-1, -0.5, world.dim_p)
-            elif i == 1:
-                agent.state.p_pos = np.random.uniform(0.5, +1, world.dim_p)
-            elif i == 2:
-                agent.state.p_pos = np.array([np.random.uniform(-1, -0.5), np.random.uniform(0.5, 1)])
+            if flip:
+                if i == 0:
+                    agent.state.p_pos = np.array([np.random.uniform(0, 1), np.random.uniform(-1, -0)])
+                elif i == 1:
+                    agent.state.p_pos = np.random.uniform(-1, -0, world.dim_p)
+                elif i == 2:
+                    agent.state.p_pos = np.array([np.random.uniform(-1, -0), np.random.uniform(0, 1)])
+                else:
+                    agent.state.p_pos = np.random.uniform(0, +1, world.dim_p)
             else:
-                agent.state.p_pos = np.array([np.random.uniform(0.5, 1), np.random.uniform(-1, -0.5)])
+                if i == 0:
+                    agent.state.p_pos = np.array([np.random.uniform(-1, -0), np.random.uniform(0, 1)])
+                elif i == 1:
+                    agent.state.p_pos = np.random.uniform(0, +1, world.dim_p)
+                elif i == 2:
+                    agent.state.p_pos = np.array([np.random.uniform(0, 1), np.random.uniform(-1, -0)])
+                else:
+                    agent.state.p_pos = np.random.uniform(-1, -0, world.dim_p)
             agent.state.p_vel = np.zeros(world.dim_p)
             agent.state.c = np.zeros(world.dim_c)
         for i, landmark in enumerate(world.landmarks):
             if i == 0:
-                landmark.state.p_pos = np.random.uniform(-1, -0.5, world.dim_p)
+                landmark.state.p_pos = np.array([np.random.uniform(-1, -0), np.random.uniform(0, 1)])
             elif i == 1:
-                landmark.state.p_pos = np.random.uniform(0.5, +1, world.dim_p)
+                landmark.state.p_pos = np.random.uniform(0, +1, world.dim_p)
             elif i == 2:
-                landmark.state.p_pos = np.array([np.random.uniform(-1, -0.5), np.random.uniform(0.5, 1)])
+                landmark.state.p_pos = np.array([np.random.uniform(0, 1), np.random.uniform(-1, -0)])
             else:
-                landmark.state.p_pos = np.array([np.random.uniform(0.5, 1), np.random.uniform(-1, -0.5)])
+                landmark.state.p_pos = np.random.uniform(-1, -0, world.dim_p)
             landmark.state.p_vel = np.zeros(world.dim_p)
 
     def benchmark_data(self, agent, world):
