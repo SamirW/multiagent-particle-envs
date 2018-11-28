@@ -24,10 +24,23 @@ class Scenario(BaseScenario):
             landmark.collide = False
             landmark.movable = False
         # make initial conditions
+        self.corner_positions = [0,1,2,3]
         self.reset_world(world)
         return world
 
     def reset_world(self, world, flip=False):
+        def corner_position(corner):
+            if corner == 0:
+                return np.random.uniform(0.5, +1, world.dim_p)
+            elif corner == 1:
+                return np.array([np.random.uniform(-1, -0.5), np.random.uniform(0.5, 1)])
+            elif corner == 2:
+                return np.random.uniform(-1, -0.5, world.dim_p)
+            elif corner == 3:
+                return np.array([np.random.uniform(0.5, 1), np.random.uniform(-1, -0.5)])
+            else:
+                raise ValueError
+
         # random properties for agents
         for i, agent in enumerate(world.agents):
             if i == 0:
@@ -42,36 +55,23 @@ class Scenario(BaseScenario):
         for i, landmark in enumerate(world.landmarks):
             landmark.color = np.array([0.25, 0.25, 0.25])
         # set random initial states
+        if flip: np.random.shuffle(self.corner_positions)
         for i, agent in enumerate(world.agents):
             if flip:
-                if i == 0:
-                    agent.state.p_pos = np.array([np.random.uniform(0, 1), np.random.uniform(-1, -0)])
-                elif i == 1:
-                    agent.state.p_pos = np.random.uniform(-1, -0, world.dim_p)
-                elif i == 2:
-                    agent.state.p_pos = np.array([np.random.uniform(-1, -0), np.random.uniform(0, 1)])
-                else:
-                    agent.state.p_pos = np.random.uniform(0, +1, world.dim_p)
+                agent.state.p_pos = corner_position(self.corner_positions[i])
             else:
-                if i == 0:
-                    agent.state.p_pos = np.array([np.random.uniform(-1, -0), np.random.uniform(0, 1)])
-                elif i == 1:
-                    agent.state.p_pos = np.random.uniform(0, +1, world.dim_p)
-                elif i == 2:
-                    agent.state.p_pos = np.array([np.random.uniform(0, 1), np.random.uniform(-1, -0)])
-                else:
-                    agent.state.p_pos = np.random.uniform(-1, -0, world.dim_p)
+                agent.state.p_pos = corner_position(corner=i)
             agent.state.p_vel = np.zeros(world.dim_p)
             agent.state.c = np.zeros(world.dim_c)
         for i, landmark in enumerate(world.landmarks):
             if i == 0:
-                landmark.state.p_pos = np.array([np.random.uniform(-1, -0), np.random.uniform(0, 1)])
+                landmark.state.p_pos = np.array([np.random.uniform(-1, -0.5), np.random.uniform(0.5, 1)])
             elif i == 1:
-                landmark.state.p_pos = np.random.uniform(0, +1, world.dim_p)
+                landmark.state.p_pos = np.random.uniform(0.5, +1, world.dim_p)
             elif i == 2:
-                landmark.state.p_pos = np.array([np.random.uniform(0, 1), np.random.uniform(-1, -0)])
+                landmark.state.p_pos = np.array([np.random.uniform(0.5, 1), np.random.uniform(-1, -0.5)])
             else:
-                landmark.state.p_pos = np.random.uniform(-1, -0, world.dim_p)
+                landmark.state.p_pos = np.random.uniform(-1, -0.5, world.dim_p)
             landmark.state.p_vel = np.zeros(world.dim_p)
 
     def benchmark_data(self, agent, world):
