@@ -8,8 +8,8 @@ class Scenario(BaseScenario):
         world = World()
         # set any world properties first
         world.dim_c = 2
-        num_agents = 4
-        num_landmarks = 4
+        num_agents = 6
+        num_landmarks = num_agents
         # add agents
         world.agents = [Agent() for i in range(num_agents)]
         for i, agent in enumerate(world.agents):
@@ -24,20 +24,24 @@ class Scenario(BaseScenario):
             landmark.collide = False
             landmark.movable = False
         # make initial conditions
-        self.corner_positions = [0,1,2,3]
+        self.corner_positions = list(range(num_agents))
         self.reset_world(world)
         return world
 
     def reset_world(self, world, flip=False):
         def corner_position(corner):
             if corner == 0:
-                return np.array([np.random.uniform(0.33, 1), np.random.uniform(0.33, 1)])
+                return np.array([np.random.uniform(0, 1), np.random.uniform(0.33, 1)])
             elif corner == 1:
-                return np.array([np.random.uniform(-1, -0.33), np.random.uniform(0.33, 1)])
+                return np.array([np.random.uniform(-1, 0), np.random.uniform(0.33, 1)])
             elif corner == 2:
-                return np.array([np.random.uniform(-1, -0.33), np.random.uniform(-1, -0.33)])
+                return np.array([np.random.uniform(-1, 0), np.random.uniform(-0.33, 0.33)])
             elif corner == 3:
-                return np.array([np.random.uniform(0.33, 1), np.random.uniform(-1, -0.33)])
+                return np.array([np.random.uniform(-1, 0), np.random.uniform(-1, -0.33)])
+            elif corner == 4:
+                return np.array([np.random.uniform(0, 1), np.random.uniform(-1, -0.33)])
+            elif corner == 5:
+                return np.array([np.random.uniform(0, 1), np.random.uniform(-0.33, 0.33)])
             else:
                 raise ValueError
 
@@ -46,11 +50,15 @@ class Scenario(BaseScenario):
             if i == 0:
                 agent.color = np.array([0.35, 0.35, 0.85])
             elif i == 1:
-                agent.color = np.array([0.85, 0.35, 0.35])
-            elif i == 2:
                 agent.color = np.array([0.35, 0.85, 0.35])
-            else:
-                agent.color = np.array([0.85, 0.85, 0.85])
+            elif i == 2:
+                agent.color = np.array([0.85, 0.35, 0.35])
+            elif i == 3:
+                agent.color = np.array([0.35, 0.85, 0.85])
+            elif i == 4:
+                agent.color = np.array([0.85, 0.35, 0.85])
+            elif i == 5:
+                agent.color = np.array([0.85, 0.85, 0.35])
         # random properties for landmarks
         for i, landmark in enumerate(world.landmarks):
             landmark.color = np.array([0.25, 0.25, 0.25])

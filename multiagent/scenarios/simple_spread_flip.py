@@ -38,8 +38,12 @@ class Scenario(BaseScenario):
         for i, landmark in enumerate(world.landmarks):
             landmark.color = np.array([0.25, 0.25, 0.25])
         # set random initial states
+        if flip:
+            actually_flip = np.random.random() < 0.5
+        else:
+            actually_flip = False
         for i, agent in enumerate(world.agents):
-            if i == flip:
+            if i == actually_flip:
                 agent.state.p_pos = np.random.uniform(-1, -0.5, world.dim_p)
             else:
                 agent.state.p_pos = np.random.uniform(0.5, +1, world.dim_p)
