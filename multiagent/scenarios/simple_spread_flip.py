@@ -23,6 +23,8 @@ class Scenario(BaseScenario):
             landmark.name = 'landmark %d' % i
             landmark.collide = False
             landmark.movable = False
+        # Counter
+        self.counter = 0
         # make initial conditions
         self.reset_world(world)
         return world
@@ -38,12 +40,8 @@ class Scenario(BaseScenario):
         for i, landmark in enumerate(world.landmarks):
             landmark.color = np.array([0.25, 0.25, 0.25])
         # set random initial states
-        if flip:
-            actually_flip = np.random.random() < 0.5
-        else:
-            actually_flip = False
         for i, agent in enumerate(world.agents):
-            if i == actually_flip:
+            if i == flip:
                 agent.state.p_pos = np.random.uniform(-1, -0.5, world.dim_p)
             else:
                 agent.state.p_pos = np.random.uniform(0.5, +1, world.dim_p)
@@ -55,6 +53,7 @@ class Scenario(BaseScenario):
             else:
                 landmark.state.p_pos = np.random.uniform(0.5, +1, world.dim_p)
             landmark.state.p_vel = np.zeros(world.dim_p)
+        self.counter = 0
 
     def benchmark_data(self, agent, world):
         rew = 0
@@ -105,8 +104,12 @@ class Scenario(BaseScenario):
         # communication of all other agents
         comm = []
         other_pos = []
+
         for other in world.agents:
             if other is agent: continue
             comm.append(other.state.c)
             other_pos.append(other.state.p_pos - agent.state.p_pos)
         return np.concatenate([agent.state.p_vel] + [agent.state.p_pos] + entity_pos + other_pos + comm)
+
+    def post_step_callback(self, world):
+        self.counter += 1

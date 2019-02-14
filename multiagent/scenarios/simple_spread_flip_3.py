@@ -8,8 +8,8 @@ class Scenario(BaseScenario):
         world = World()
         # set any world properties first
         world.dim_c = 2
-        num_agents = 4
-        num_landmarks = 4
+        num_agents = 3
+        num_landmarks = 3
         # add agents
         world.agents = [Agent() for i in range(num_agents)]
         for i, agent in enumerate(world.agents):
@@ -24,7 +24,7 @@ class Scenario(BaseScenario):
             landmark.collide = False
             landmark.movable = False
         # make initial conditions
-        self.corner_positions = [0,1,2,3]
+        self.flipped_corner_positions = [1,2,0]
         self.reset_world(world)
         return world
 
@@ -33,10 +33,8 @@ class Scenario(BaseScenario):
             if corner == 0:
                 return np.array([np.random.uniform(0.33, 1), np.random.uniform(0.33, 1)])
             elif corner == 1:
-                return np.array([np.random.uniform(-1, -0.33), np.random.uniform(0.33, 1)])
-            elif corner == 2:
                 return np.array([np.random.uniform(-1, -0.33), np.random.uniform(-1, -0.33)])
-            elif corner == 3:
+            elif corner == 2:
                 return np.array([np.random.uniform(0.33, 1), np.random.uniform(-1, -0.33)])
             else:
                 raise ValueError
@@ -49,16 +47,13 @@ class Scenario(BaseScenario):
                 agent.color = np.array([0.85, 0.35, 0.35])
             elif i == 2:
                 agent.color = np.array([0.35, 0.85, 0.35])
-            else:
-                agent.color = np.array([0.85, 0.85, 0.85])
         # random properties for landmarks
         for i, landmark in enumerate(world.landmarks):
             landmark.color = np.array([0.25, 0.25, 0.25])
         # set random initial states
-        if flip: np.random.shuffle(self.corner_positions)
         for i, agent in enumerate(world.agents):
             if flip:
-                agent.state.p_pos = corner_position(self.corner_positions[i])
+                agent.state.p_pos = corner_position(self.flipped_corner_positions[i])
             else:
                 agent.state.p_pos = corner_position(corner=i)
             agent.state.p_vel = np.zeros(world.dim_p)
