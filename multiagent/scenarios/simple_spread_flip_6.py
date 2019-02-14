@@ -31,17 +31,17 @@ class Scenario(BaseScenario):
     def reset_world(self, world, flip=False):
         def corner_position(corner):
             if corner == 0:
-                return np.array([np.random.uniform(0, 1), np.random.uniform(0.33, 1)])
+                return np.array([np.random.uniform(0.33, 1), np.random.uniform(0.6, 1)])
             elif corner == 1:
-                return np.array([np.random.uniform(-1, 0), np.random.uniform(0.33, 1)])
+                return np.array([np.random.uniform(-1, -0.33), np.random.uniform(0.6, 1)])
             elif corner == 2:
-                return np.array([np.random.uniform(-1, 0), np.random.uniform(-0.33, 0.33)])
+                return np.array([np.random.uniform(-1, -0.33), np.random.uniform(-0.2, 0.2)])
             elif corner == 3:
-                return np.array([np.random.uniform(-1, 0), np.random.uniform(-1, -0.33)])
+                return np.array([np.random.uniform(-1, 0.33), np.random.uniform(-1, -0.6)])
             elif corner == 4:
-                return np.array([np.random.uniform(0, 1), np.random.uniform(-1, -0.33)])
+                return np.array([np.random.uniform(0.33, 1), np.random.uniform(-1, -0.6)])
             elif corner == 5:
-                return np.array([np.random.uniform(0, 1), np.random.uniform(-0.33, 0.33)])
+                return np.array([np.random.uniform(0.33, 1), np.random.uniform(-0.2, 0.2)])
             else:
                 raise ValueError
 
@@ -129,3 +129,6 @@ class Scenario(BaseScenario):
             comm.append(other.state.c)
             other_pos.append(other.state.p_pos - agent.state.p_pos)
         return np.concatenate([agent.state.p_vel] + [agent.state.p_pos] + entity_pos + other_pos + comm)
+
+    def post_step_callback(self, world):
+        pass
