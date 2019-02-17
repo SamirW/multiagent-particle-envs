@@ -24,7 +24,8 @@ class Scenario(BaseScenario):
             landmark.collide = False
             landmark.movable = False
         # make initial conditions
-        self.corner_positions = [0,1,2,3]
+        self.training_corner_positions = [[3,0,1,2],[2,1,3,0]]
+        self.flipped_corner_positions = [0,1,2,3]
         self.reset_world(world)
         return world
 
@@ -55,12 +56,13 @@ class Scenario(BaseScenario):
         for i, landmark in enumerate(world.landmarks):
             landmark.color = np.array([0.25, 0.25, 0.25])
         # set random initial states
-        if flip: np.random.shuffle(self.corner_positions)
+        if flip: np.random.shuffle(self.flipped_corner_positions)
         for i, agent in enumerate(world.agents):
             if flip:
-                agent.state.p_pos = corner_position(self.corner_positions[i])
+                agent.state.p_pos = corner_position(self.flipped_corner_positions[i])
             else:
-                agent.state.p_pos = corner_position(corner=i)
+                starting_poses = self.training_corner_positions[np.random.randint(len(self.training_corner_positions))]
+                agent.state.p_pos = corner_position(starting_poses[i])
             agent.state.p_vel = np.zeros(world.dim_p)
             agent.state.c = np.zeros(world.dim_c)
         for i, landmark in enumerate(world.landmarks):

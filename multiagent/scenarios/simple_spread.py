@@ -99,4 +99,6 @@ class Scenario(BaseScenario):
             if other is agent: continue
             comm.append(other.state.c)
             other_pos.append(other.state.p_pos - agent.state.p_pos)
+        entity_pos = sorted(entity_pos, key=lambda pos: np.arctan2(pos[1], pos[0]))
+        other_pos = sorted(other_pos, key=lambda pos: np.arctan2(pos[1], pos[0]))
         return np.concatenate([agent.state.p_vel] + [agent.state.p_pos] + entity_pos + other_pos + comm)
