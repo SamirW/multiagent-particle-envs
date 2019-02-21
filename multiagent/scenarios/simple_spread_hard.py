@@ -1,18 +1,28 @@
 import numpy as np
-from multiagent.core import World, Agent, Landmark
+from multiagent.core import World, Agent, Landmark, Wall
 from multiagent.scenario import BaseScenario
 
+walls = [
+    ['V', -1/8, (-1/4, 1), 0.05], 
+    ['V', -1/8, (-1, -3/4), 0.05],
+    ['H', 0, (-1/8, 1/4), 0.05],
+    ['H', 0, (3/4, 1), 0.05],
+    ['V', -9/16, (-1, -3/8), 0.05],
+    ['H', 1/8, (-9/16, -1/8), 0.05],
+    ['H', 5/8, (-1, -5/8), 0.05],
+    ['H', -1, (-1, 1), 0.05],
+    ['V', -1, (-1, 1), 0.05],
+    ['H', 1, (-1, 1), 0.05],
+    ['V', 1, (-1, 1), 0.05]]
 
 class Scenario(BaseScenario):
 
     def make_world(self):
         world = World()
-        # create obstacles first
-        self.obstacles = self.make_obstacles()
         # set any world properties
         world.dim_c = 2
         num_agents = 3
-        num_landmarks = 3 + self.obstacles.shape[0]
+        num_landmarks = 3
         # add agents
         world.agents = [Agent() for i in range(num_agents)]
         for i, agent in enumerate(world.agents):
@@ -20,6 +30,7 @@ class Scenario(BaseScenario):
             agent.collide = True
             agent.silent = True
             agent.size = 0.1
+            agent.max_speed = 0.9
         # add landmarks
         world.landmarks = [Landmark() for i in range(num_landmarks)]
         for i, landmark in enumerate(world.landmarks):
@@ -32,7 +43,8 @@ class Scenario(BaseScenario):
                 landmark.collide = True
                 landmark.movable = False
                 landmark.size = 0.04
-        # create obstacles
+        # add walls
+        world.walls = [Wall(*w) for w in walls]
         # make initial conditions
         self.reset_world(world)
         return world
@@ -62,23 +74,23 @@ class Scenario(BaseScenario):
                 if i == 0: # start anywhere
                     agent.state.p_pos = np.random.uniform(-1, 1, world.dim_p)
                 elif i == 1: # start in LL room
-                    agent.state.p_pos = np.array([np.random.uniform(0, -1/8), np.random.uniform(-1, 1/8)])
+                    agent.state.p_pos = np.array([np.random.uniform(-.95, -.1), np.random.uniform(-1, 1/8)])
                 elif i == 2:
                     if np.random.random() < 0.5: # start in UR room
-                        agent.state.p_pos = np.array([np.random.uniform(-1/8, 1), np.random.uniform(3/4, 1)])
+                        agent.state.p_pos = np.array([np.random.uniform(-1/8, 1), np.random.uniform(0, 1)])
                     else: # start in UL room
-                        agent.state.p_pos = np.array([np.random.uniform(0, -1/8), np.random.uniform(1/8, 1)])
+                        agent.state.p_pos = np.array([np.random.uniform(-1, -1/8), np.random.uniform(1/8, 1)])
                 else:
                     raise ValueError()
             else:
                 agent.state.p_pos = np.random.uniform(-1, 1, world.dim_p)
         for i, landmark in enumerate(world.landmarks):
             if i == 0:
-                landmark.state.p_pos = np.array([-3/8, 7/8])
+                landmark.state.p_pos = np.array([-3/4, 13/16])
             elif i == 1:
-                landmark.state.p_pos = np.array([-7/8, -7/8])
+                landmark.state.p_pos = np.array([-25/32, -13/16])
             elif i == 2:
-                landmark.state.p_pos = np.array([13/16, -13/16])
+                landmark.state.p_pos = np.array([3/4, -3/4])
             else:
                 landmark.state.p_pos = self.obstacles[i-3]
             landmark.state.p_vel = np.zeros(world.dim_p)
@@ -120,9 +132,6 @@ class Scenario(BaseScenario):
             for a in world.agents:
                 if self.is_collision(a, agent):
                     rew -= 1
-            for l in world.landmarks[3:]:
-                if self.is_collision(l, agent):
-                    rew -= 0.1
         return rew
 
     def observation(self, agent, world):
@@ -147,40 +156,6 @@ class Scenario(BaseScenario):
         other_pos = sorted(
             other_pos, key=lambda pos: np.arctan2(pos[1], pos[0]))
         return np.concatenate([agent.state.p_vel] + [agent.state.p_pos] + entity_pos + other_pos + comm)
-
-    def make_obstacles(self):
-        def wall_to_obstacles(x_start, x_stop, y_start, y_stop):
-            assert x_stop >= x_start
-            assert y_stop >= y_start
-
-            x_dist = x_stop-x_start
-            y_dist = y_stop-y_start
-            dist = np.sqrt(x_dist**2 + y_dist**2)
-            
-            num_obstacles = dist/ 0.1
-            x_coords = np.linspace(x_start, x_stop, num_obstacles+1)            
-            y_coords = np.linspace(y_start, y_stop, num_obstacles+1)
-
-            return list(zip(x_coords, y_coords))
-
-        # set of walls
-        walls = [
-            [-1/8, -1/8, -1/4, 1], 
-            [-1/8, -1/8, -1, -3/4],
-            [-1/8, 1/4, 0, 0],
-            [3/4, 1, 0, 0],
-            [-9/16, -9/16, -1, -3/8],
-            [-1, -5/8, 1/8, 1/8],
-            [-9/16, -1/8, 5/8, 5/8],
-            [7/16, 11/16, -11/16, -7/16]
-            ]
-
-        # create obstacles
-        obstacles = []
-        for wall in walls:
-            obstacles = obstacles + wall_to_obstacles(*wall)
-
-        return np.array(obstacles)
 
     def post_step_callback(self, world):
         pass
