@@ -30,7 +30,7 @@ class Scenario(BaseScenario):
             agent.collide = True
             agent.silent = True
             agent.size = 0.1
-            agent.max_speed = 0.9
+            agent.max_speed = 0.85
         # add landmarks
         world.landmarks = [Landmark() for i in range(num_landmarks)]
         for i, landmark in enumerate(world.landmarks):
@@ -120,11 +120,26 @@ class Scenario(BaseScenario):
         dist_min = agent1.size + agent2.size
         return True if dist < dist_min else False
 
+    def is_wall_collision(self, wall, agent):
+        if agent.ghost and not wall.hard:
+            return False  # ghost passes through soft walls
+        if wall.orient == 'H':
+            prll_dim = 0
+            perp_dim = 1
+        else:
+            prll_dim = 1
+            perp_dim = 0
+        ent_pos = agent.state.p_pos
+        if (ent_pos[prll_dim] < wall.endpoints[0] - agent.size or
+            ent_pos[prll_dim] > wall.endpoints[1] + agent.size):
+            return False  # agent is beyond endpoints of wall
+        return True
+
     def reward(self, agent, world):
         # Agents are rewarded based on minimum agent distance to each landmark,
         # penalized for collisions
         rew = 0
-        for l in world.landmarks[:3]:
+        for l in world.landmarks:
             dists = [np.sqrt(np.sum(np.square(a.state.p_pos - l.state.p_pos)))
                      for a in world.agents]
             rew -= min(dists)
@@ -132,12 +147,15 @@ class Scenario(BaseScenario):
             for a in world.agents:
                 if self.is_collision(a, agent):
                     rew -= 1
+            for w in world.walls:
+                if self.is_wall_collision(w, agent):
+                    rew -= 0.25
         return rew
 
     def observation(self, agent, world):
         # get positions of all entities in this agent's reference frame
         entity_pos = []
-        for entity in world.landmarks[:3]:  # world.entities:
+        for entity in world.landmarks:  # world.entities:
             entity_pos.append(entity.state.p_pos - agent.state.p_pos)
         # entity colors
         entity_color = []
