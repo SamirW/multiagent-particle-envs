@@ -24,8 +24,7 @@ class Scenario(BaseScenario):
             landmark.collide = False
             landmark.movable = False
         # make initial conditions
-        self.training_corner_positions = [[3,0,1,2],[2,1,3,0]]
-        self.flipped_corner_positions = [0,1,2,3]
+        self.flipped_corner_positions = [3,0,1,2]
         self.reset_world(world)
         return world
 
@@ -61,8 +60,7 @@ class Scenario(BaseScenario):
             if flip:
                 agent.state.p_pos = corner_position(self.flipped_corner_positions[i])
             else:
-                starting_poses = self.training_corner_positions[np.random.randint(len(self.training_corner_positions))]
-                agent.state.p_pos = corner_position(starting_poses[i])
+                agent.state.p_pos = corner_position(i)
             agent.state.p_vel = np.zeros(world.dim_p)
             agent.state.c = np.zeros(world.dim_c)
         for i, landmark in enumerate(world.landmarks):
@@ -122,6 +120,8 @@ class Scenario(BaseScenario):
             if other is agent: continue
             comm.append(other.state.c)
             other_pos.append(other.state.p_pos - agent.state.p_pos)
+        entity_pos = sorted(entity_pos, key=lambda pos: np.arctan2(pos[1], pos[0]))
+        other_pos = sorted(other_pos, key=lambda pos: np.arctan2(pos[1], pos[0]))
         return np.concatenate([agent.state.p_vel] + [agent.state.p_pos] + entity_pos + other_pos + comm)
 
     def post_step_callback(self, world):
