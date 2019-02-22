@@ -309,7 +309,8 @@ class World(object):
                 dist_past_end = ent_pos[prll_dim] - wall.endpoints[0]
             else:
                 dist_past_end = ent_pos[prll_dim] - wall.endpoints[1]
-            theta = np.arcsin(dist_past_end / entity.size)
+            inp = max(-1.0, min(1.0, dist_past_end / entity.size))
+            theta = np.arcsin(inp)
             dist_min = np.cos(theta) * entity.size + 0.5 * wall.width
         else:  # entire entity lies within bounds of wall
             theta = 0
@@ -322,6 +323,7 @@ class World(object):
         # softmax penetration
         k = self.contact_margin
         penetration = np.logaddexp(0, -(dist - dist_min)/k)*k
+        dist = max(dist, 1e-3)
         force_mag = self.contact_force * delta_pos / dist * penetration
         force = np.zeros(2)
         force[perp_dim] = np.cos(theta) * force_mag
