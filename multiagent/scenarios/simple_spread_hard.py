@@ -61,16 +61,15 @@ class Scenario(BaseScenario):
 
         # set properties for landmarks
         for i, landmark in enumerate(world.landmarks):
-            if i < 3:
-                landmark.color = np.array([0.25, 0.25, 0.25])
-            else:
-                landmark.color = np.array([0.80, 0.80, 0.80])
+            landmark.color = np.array([0.25, 0.25, 0.25])
 
-        # set random initial states + obstacles
+        # set random initial states
         for i, agent in enumerate(world.agents):
             agent.state.p_vel = np.zeros(world.dim_p)
             agent.state.c = np.zeros(world.dim_c)
-            if True:
+            if flip: # everyone starts everywhere
+                agent.state.p_pos = np.random.uniform(-1, 1, world.dim_p)
+            else:
                 if i == 0: # start anywhere
                     agent.state.p_pos = np.random.uniform(-1, 1, world.dim_p)
                 elif i == 1: # start in LL room
@@ -82,8 +81,6 @@ class Scenario(BaseScenario):
                         agent.state.p_pos = np.array([np.random.uniform(-1, -1/8), np.random.uniform(1/8, 1)])
                 else:
                     raise ValueError()
-            else:
-                agent.state.p_pos = np.random.uniform(-1, 1, world.dim_p)
         for i, landmark in enumerate(world.landmarks):
             if i == 0:
                 landmark.state.p_pos = np.array([-3/4, 13/16])
