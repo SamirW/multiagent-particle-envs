@@ -10,6 +10,7 @@ class Scenario(BaseScenario):
         world.dim_c = 2
         num_agents = 2
         num_landmarks = 2
+
         # add agents
         world.agents = [Agent() for i in range(num_agents)]
         for i, agent in enumerate(world.agents):
@@ -17,6 +18,8 @@ class Scenario(BaseScenario):
             agent.collide = True
             agent.silent = True
             agent.size = 0.15
+            agent.index = i
+
         # add landmarks
         world.landmarks = [Landmark() for i in range(num_landmarks)]
         for i, landmark in enumerate(world.landmarks):
@@ -25,6 +28,7 @@ class Scenario(BaseScenario):
             landmark.movable = False
         # make initial conditions
         self.reset_world(world)
+        self.timestep = 0
         return world
 
     def reset_world(self, world, flip=False):
@@ -45,6 +49,7 @@ class Scenario(BaseScenario):
         for i, landmark in enumerate(world.landmarks):
             landmark.state.p_pos = np.random.uniform(-1, +1, world.dim_p)
             landmark.state.p_vel = np.zeros(world.dim_p)
+        self.timestep = 0
 
     def benchmark_data(self, agent, world):
         rew = 0
@@ -84,6 +89,9 @@ class Scenario(BaseScenario):
         return rew
 
     def observation(self, agent, world):
+        if agent.index == 0:
+            self.timestep += 1
+
         # get positions of all entities in this agent's reference frame
         entity_pos = []
         for entity in world.landmarks:  # world.entities:
@@ -101,4 +109,4 @@ class Scenario(BaseScenario):
             other_pos.append(other.state.p_pos - agent.state.p_pos)
         entity_pos = sorted(entity_pos, key=lambda pos: np.arctan2(pos[1], pos[0]))
         other_pos = sorted(other_pos, key=lambda pos: np.arctan2(pos[1], pos[0]))
-        return np.concatenate([agent.state.p_vel] + [agent.state.p_pos] + entity_pos + other_pos + comm)
+        return np.concatenate([agent.state.p_vel] + [agent.state.p_pos] + entity_pos + other_pos + comm + [np.array([self.timestep / 25.])])
