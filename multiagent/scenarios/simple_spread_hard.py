@@ -165,8 +165,8 @@ class Scenario(BaseScenario):
                     rew -= 1
             for w in world.walls:
                 if self.is_wall_collision(w, agent):
-                    rew -= 1
-        return (rew*5)
+                    rew -= 0.5
+        return rew
 
     def observation(self, agent, world):
         # get positions of all entities in this agent's reference frame
