@@ -3,18 +3,13 @@ from multiagent.core import World, Agent, Landmark, Wall
 from multiagent.scenario import BaseScenario
 
 walls = [
-    # ['V', -1/8, (-1/4, 1), 0.05], 
-    # ['V', -1/8, (-1/4, 3/8), 0.05],
-    ['V', -1/8, (-2/8, 10/16), 0.05],
-    ['V', -1/8, (1, 1), 0.05],
+    ['V', -1/8, (-1/4, 1), 0.05], 
     ['V', -1/8, (-1, -3/4), 0.05],
     ['H', 0, (-1/8, 1/4), 0.05],
     ['H', 0, (3/4, 1), 0.05],
-    ['V', -7/16, (-1, -4/8), 0.05],
+    ['V', -9/16, (-1, -3/8), 0.05],
     ['H', 1/8, (-9/16, -1/8), 0.05],
-    ['H', 7/16, (-1, -7/16), 0.05],
-    ['H', -5/16, (1/4, 5/8), 0.05],
-    ['V', 1/4, (-5/16, -11/16), 0.05],
+    ['H', 5/8, (-1, -5/8), 0.05],
     ['H', -1, (-1, 1), 0.05],
     ['V', -1, (-1, 1), 0.05],
     ['H', 1, (-1, 1), 0.05],
@@ -35,7 +30,7 @@ class Scenario(BaseScenario):
             agent.collide = True
             agent.silent = True
             agent.size = 0.1
-            agent.max_speed = 0.75
+            agent.max_speed = 1
         # add landmarks
         world.landmarks = [Landmark() for i in range(num_landmarks)]
         for i, landmark in enumerate(world.landmarks):
@@ -54,24 +49,6 @@ class Scenario(BaseScenario):
         self.reset_world(world)
         return world
 
-    def set_agent_pose(self, world, agent, i, flip=False):
-        agent.state.p_vel = np.zeros(world.dim_p)
-        agent.state.c = np.zeros(world.dim_c)
-        if flip: # everyone starts everywhere
-            agent.state.p_pos = np.random.uniform(-1, 1, world.dim_p)
-        else:
-            if i == 0: # start anywhere
-                agent.state.p_pos = np.random.uniform(-1, 1, world.dim_p)
-            elif i == 1: # start in LL room
-                agent.state.p_pos = np.array([np.random.uniform(-.95, -.1), np.random.uniform(-1, 1/8)])
-            elif i == 2:
-                if np.random.random() < 0.5: # start in UR room
-                    agent.state.p_pos = np.array([np.random.uniform(-1/8, 1), np.random.uniform(0, 1)])
-                else: # start in UL room
-                    agent.state.p_pos = np.array([np.random.uniform(-1, -1/8), np.random.uniform(1/8, 1)])
-            else:
-                raise ValueError()
-
     def reset_world(self, world, flip=False):
         # set properties for agents
         for i, agent in enumerate(world.agents):
@@ -88,15 +65,22 @@ class Scenario(BaseScenario):
 
         # set random initial states
         for i, agent in enumerate(world.agents):
-            # set initial pose
-            self.set_agent_pose(world, agent, i, flip=flip)
-            # check for collisions
-            collisions = [self.is_wall_collision(w, agent) for w in world.walls]
-            while any(collisions):
-                # if collision, reset pose
-                self.set_agent_pose(world, agent, i, flip=flip)
-                collisions = [self.is_wall_collision(w, agent) for w in world.walls]
-
+            agent.state.p_vel = np.zeros(world.dim_p)
+            agent.state.c = np.zeros(world.dim_c)
+            if flip: # everyone starts everywhere
+                agent.state.p_pos = np.random.uniform(-1, 1, world.dim_p)
+            else:
+                if i == 0: # start anywhere
+                    agent.state.p_pos = np.random.uniform(-1, 1, world.dim_p)
+                elif i == 1: # start in LL room
+                    agent.state.p_pos = np.array([np.random.uniform(-.95, -.1), np.random.uniform(-1, 1/8)])
+                elif i == 2:
+                    if np.random.random() < 0.5: # start in UR room
+                        agent.state.p_pos = np.array([np.random.uniform(-1/8, 1), np.random.uniform(0, 1)])
+                    else: # start in UL room
+                        agent.state.p_pos = np.array([np.random.uniform(-1, -1/8), np.random.uniform(1/8, 1)])
+                else:
+                    raise ValueError()
         for i, landmark in enumerate(world.landmarks):
             if i == 0:
                 landmark.state.p_pos = np.array([-3/4, 13/16])
@@ -146,9 +130,6 @@ class Scenario(BaseScenario):
         if (ent_pos[prll_dim] < wall.endpoints[0] - agent.size or
             ent_pos[prll_dim] > wall.endpoints[1] + agent.size):
             return False  # agent is beyond endpoints of wall
-        if (ent_pos[perp_dim] > wall.axis_pos + agent.size or
-            ent_pos[perp_dim] < wall.axis_pos - agent.size):
-            return False
         return True
 
     def reward(self, agent, world):
@@ -165,7 +146,7 @@ class Scenario(BaseScenario):
                     rew -= 1
             for w in world.walls:
                 if self.is_wall_collision(w, agent):
-                    rew -= 0.5
+                    rew -= 0.25
         return rew
 
     def observation(self, agent, world):

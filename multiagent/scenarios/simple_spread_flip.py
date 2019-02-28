@@ -111,7 +111,7 @@ class Scenario(BaseScenario):
             other_pos.append(other.state.p_pos - agent.state.p_pos)
         entity_pos = sorted(entity_pos, key=lambda pos: np.arctan2(pos[1], pos[0]))
         other_pos = sorted(other_pos, key=lambda pos: np.arctan2(pos[1], pos[0]))
-        return np.concatenate([agent.state.p_vel] + [agent.state.p_pos] + entity_pos + other_pos + comm + [np.array([self.counter / 25.])])
+        return np.concatenate([agent.state.p_vel] + [agent.state.p_pos] + entity_pos + other_pos + comm)
 
     def post_step_callback(self, world):
         self.counter += 1
