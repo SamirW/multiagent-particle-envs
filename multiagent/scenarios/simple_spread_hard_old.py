@@ -3,18 +3,15 @@ from multiagent.core import World, Agent, Landmark, Wall
 from multiagent.scenario import BaseScenario
 
 walls = [
-    # ['V', -1/8, (-1/4, 1), 0.05], 
-    # ['V', -1/8, (-1/4, 3/8), 0.05],
-    ['V', -1/8, (-2/8, 10/16), 0.05],
-    ['V', -1/8, (1, 1), 0.05],
+    ['V', -1/8, (-1/4, 1), 0.05], 
     ['V', -1/8, (-1, -3/4), 0.05],
     ['H', 0, (-1/8, 1/4), 0.05],
     ['H', 0, (3/4, 1), 0.05],
-    ['V', -7/16, (-1, -4/8), 0.05],
+    ['V', -9/16, (-1, -3/8), 0.05],
     ['H', 1/8, (-9/16, -1/8), 0.05],
-    ['H', 7/16, (-1, -7/16), 0.05],
+    ['H', 5/8, (-1, -5/8), 0.05],
     ['H', -5/16, (1/4, 5/8), 0.05],
-    ['V', 1/4, (-5/16, -11/16), 0.05],
+    ['V', 1/4, (-5/16, -5/8), 0.05],
     ['H', -1, (-1, 1), 0.05],
     ['V', -1, (-1, 1), 0.05],
     ['H', 1, (-1, 1), 0.05],
@@ -35,7 +32,7 @@ class Scenario(BaseScenario):
             agent.collide = True
             agent.silent = True
             agent.size = 0.1
-            agent.max_speed = 0.75
+            agent.max_speed = 1
         # add landmarks
         world.landmarks = [Landmark() for i in range(num_landmarks)]
         for i, landmark in enumerate(world.landmarks):
@@ -165,8 +162,8 @@ class Scenario(BaseScenario):
                     rew -= 1
             for w in world.walls:
                 if self.is_wall_collision(w, agent):
-                    rew -= 1
-        return (rew*5)
+                    rew -= 0.25
+        return rew
 
     def observation(self, agent, world):
         # get positions of all entities in this agent's reference frame
