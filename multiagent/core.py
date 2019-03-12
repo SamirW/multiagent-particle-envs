@@ -114,9 +114,10 @@ class World(object):
         # color dimensionality
         self.dim_color = 3
         # simulation timestep
-        self.dt = 0.1
+        self.dt = 0.01
         # physical damping
-        self.damping = 0.25
+        # self.damping = 0.25
+        self.damping = 0.05
         # contact response parameters
         self.contact_force = 1e+2
         self.contact_margin = 1e-3
@@ -124,6 +125,8 @@ class World(object):
         self.cache_dists = False
         self.cached_dist_vect = None
         self.cached_dist_mag = None
+        # constraints
+        self.max_accel = 2.0
 
     # return all entities in the world
     @property
@@ -238,12 +241,15 @@ class World(object):
             if not entity.movable: continue
             entity.state.p_vel = entity.state.p_vel * (1 - self.damping)
             if (p_force[i] is not None):
-                entity.state.p_vel += (p_force[i] / entity.mass) * self.dt
+                accel = np.copy(p_force[i]) / entity.mass
+                np.clip(accel, -self.max_accel, self.max_accel, out=accel)
+                entity.state.p_vel += accel * self.dt
             if entity.max_speed is not None:
                 speed = np.sqrt(np.square(entity.state.p_vel[0]) + np.square(entity.state.p_vel[1]))
                 if speed > entity.max_speed:
                     entity.state.p_vel = entity.state.p_vel / np.sqrt(np.square(entity.state.p_vel[0]) +
                                                                   np.square(entity.state.p_vel[1])) * entity.max_speed
+
             entity.state.p_pos += entity.state.p_vel * self.dt
 
     def update_agent_state(self, agent):

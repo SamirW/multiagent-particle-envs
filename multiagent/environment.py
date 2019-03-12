@@ -108,9 +108,12 @@ class MultiAgentEnv(gym.Env):
             self.post_step_callback(self.world)
         return obs_n, reward_n, done_n, info_n
 
-    def _reset(self, flip=False):
+    def _reset(self, flip=False, start_poses=None):
         # reset world
-        self.reset_callback(self.world, flip=flip)
+        if start_poses is None:
+            self.reset_callback(self.world, flip=flip)
+        else:
+            self.reset_callback(self.world, flip=flip, start_poses=start_poses)
         # reset renderer
         self._reset_render()
         # record observations for each agent
@@ -293,7 +296,7 @@ class MultiAgentEnv(gym.Env):
         for i in range(len(self.viewers)):
             from multiagent import rendering
             # update bounds to center around agent
-            cam_range = 1
+            cam_range = 3
             if self.shared_viewer:
                 pos = np.zeros(self.world.dim_p)
             else:
