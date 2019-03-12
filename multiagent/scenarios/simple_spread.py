@@ -16,18 +16,19 @@ class Scenario(BaseScenario):
             agent.name = 'agent %d' % i
             agent.collide = True
             agent.silent = True
-            agent.size = 0.15
+            agent.size = 0.4
         # add landmarks
         world.landmarks = [Landmark() for i in range(num_landmarks)]
         for i, landmark in enumerate(world.landmarks):
             landmark.name = 'landmark %d' % i
             landmark.collide = False
             landmark.movable = False
+            landmark.size = 0.15
         # make initial conditions
         self.reset_world(world)
         return world
 
-    def reset_world(self, world, flip=False):
+    def reset_world(self, world, flip=False, start_poses=None):
         # random properties for agents
         for i, agent in enumerate(world.agents):
             if i == 0:
@@ -38,10 +39,14 @@ class Scenario(BaseScenario):
         for i, landmark in enumerate(world.landmarks):
             landmark.color = np.array([0.25, 0.25, 0.25])
         # set random initial states
-        for agent in world.agents:
-            agent.state.p_pos = np.random.uniform(-1, +1, world.dim_p)
-            agent.state.p_vel = np.zeros(world.dim_p)
-            agent.state.c = np.zeros(world.dim_c)
+        if start_poses is None:
+            for agent in world.agents:
+                agent.state.p_pos = np.random.uniform(-1, +1, world.dim_p)
+                agent.state.p_vel = np.zeros(world.dim_p)
+                agent.state.c = np.zeros(world.dim_c)
+        else:
+            for i, agent in enumerate(world.agents):
+                agent.state.p_pos = np.array(start_poses[i])
         for i, landmark in enumerate(world.landmarks):
             landmark.state.p_pos = np.random.uniform(-1, +1, world.dim_p)
             landmark.state.p_vel = np.zeros(world.dim_p)
