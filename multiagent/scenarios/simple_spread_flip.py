@@ -54,11 +54,11 @@ class Scenario(BaseScenario):
                 agent.state.p_pos = np.array(start_poses[i])
         for i, landmark in enumerate(world.landmarks):
             if i == flip:
-                # landmark.state.p_pos = np.random.uniform(-3, -0.5, world.dim_p)
-                landmark.state.p_pos = np.random.uniform(-0.5, 0.5, world.dim_p)
+                landmark.state.p_pos = np.random.uniform(-3, -0.5, world.dim_p)
+                # landmark.state.p_pos = np.random.uniform(-0.5, 0.5, world.dim_p)
             else:
-                # landmark.state.p_pos = np.random.uniform(0.5, +3, world.dim_p)
-                landmark.state.p_pos = np.random.uniform(-0.5, 0.5, world.dim_p)
+                landmark.state.p_pos = np.random.uniform(0.5, +3, world.dim_p)
+                # landmark.state.p_pos = np.random.uniform(-0.5, 0.5, world.dim_p)
             landmark.state.p_vel = np.zeros(world.dim_p)
         self.counter = 0
 
