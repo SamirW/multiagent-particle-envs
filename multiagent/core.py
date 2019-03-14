@@ -126,7 +126,7 @@ class World(object):
         self.cached_dist_vect = None
         self.cached_dist_mag = None
         # constraints
-        self.max_accel = 4.0
+        self.max_accel = 2.0
 
     # return all entities in the world
     @property

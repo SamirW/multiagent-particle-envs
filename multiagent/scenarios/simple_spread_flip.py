@@ -16,7 +16,7 @@ class Scenario(BaseScenario):
             agent.name = 'agent %d' % i
             agent.collide = True
             agent.silent = True
-            agent.size = 0.4
+            agent.size = 0.75
         # add landmarks
         world.landmarks = [Landmark() for i in range(num_landmarks)]
         for i, landmark in enumerate(world.landmarks):
@@ -53,10 +53,12 @@ class Scenario(BaseScenario):
             for i, agent in enumerate(world.agents):
                 agent.state.p_pos = np.array(start_poses[i])
         for i, landmark in enumerate(world.landmarks):
-            if i == 0:
-                landmark.state.p_pos = np.random.uniform(-3, -0.5, world.dim_p)
+            if i == flip:
+                # landmark.state.p_pos = np.random.uniform(-3, -0.5, world.dim_p)
+                landmark.state.p_pos = np.random.uniform(-0.5, 0.5, world.dim_p)
             else:
-                landmark.state.p_pos = np.random.uniform(0.5, +3, world.dim_p)
+                # landmark.state.p_pos = np.random.uniform(0.5, +3, world.dim_p)
+                landmark.state.p_pos = np.random.uniform(-0.5, 0.5, world.dim_p)
             landmark.state.p_vel = np.zeros(world.dim_p)
         self.counter = 0
 
