@@ -126,7 +126,7 @@ class World(object):
         self.cached_dist_vect = None
         self.cached_dist_mag = None
         # constraints
-        self.max_accel = 2.0
+        self.max_accel = 2.5
 
     # return all entities in the world
     @property
@@ -249,7 +249,6 @@ class World(object):
                 if speed > entity.max_speed:
                     entity.state.p_vel = entity.state.p_vel / np.sqrt(np.square(entity.state.p_vel[0]) +
                                                                   np.square(entity.state.p_vel[1])) * entity.max_speed
-
             entity.state.p_pos += entity.state.p_vel * self.dt
 
     def update_agent_state(self, agent):

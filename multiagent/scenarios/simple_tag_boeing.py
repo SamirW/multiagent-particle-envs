@@ -1,7 +1,12 @@
 import numpy as np
-from multiagent.core import World, Agent, Landmark
+from multiagent.core import World, Agent, Landmark, Wall
 from multiagent.scenario import BaseScenario
 
+walls = [
+    ['V', -3, (-3, 3), 0.05],
+    ['V', 3, (-3, 3), 0.05],
+    ['H', -3, (-3, 3), 0.05],
+    ['H', 3, (-3, 3), 0.05]]
 
 class Scenario(BaseScenario):
     def make_world(self):
@@ -11,7 +16,7 @@ class Scenario(BaseScenario):
         num_good_agents = 1
         num_adversaries = 1
         num_agents = num_adversaries + num_good_agents
-        num_landmarks = 1
+        num_landmarks = 0
         # add agents
         world.agents = [Agent() for i in range(num_agents)]
         for i, agent in enumerate(world.agents):
@@ -19,10 +24,10 @@ class Scenario(BaseScenario):
             agent.collide = True
             agent.silent = True
             agent.adversary = True if i < num_adversaries else False
-            agent.size = 0.75 if agent.adversary else 0.75
-            agent.accel = 1.75 if agent.adversary else 2.33
+            agent.size = 0.75 if agent.adversary else 0.5
+            agent.accel = 1.0 if agent.adversary else 2.5
             #agent.accel = 20.0 if agent.adversary else 25.0
-            agent.max_speed = 1.0 if agent.adversary else 1.3
+            agent.max_speed = 1.0 if agent.adversary else 1.5
         # add landmarks
         world.landmarks = [Landmark() for i in range(num_landmarks)]
         for i, landmark in enumerate(world.landmarks):
@@ -31,12 +36,14 @@ class Scenario(BaseScenario):
             landmark.movable = False
             landmark.size = 0.2
             landmark.boundary = False
+        # add walls
+        world.walls = [Wall(*w) for w in walls]
         # make initial conditions
         self.reset_world(world)
         return world
 
 
-    def reset_world(self, world, flip=False):
+    def reset_world(self, world, flip=False, start_poses=None):
         # random properties for agents
         for i, agent in enumerate(world.agents):
             agent.color = np.array([0.35, 0.85, 0.35]) if not agent.adversary else np.array([0.85, 0.35, 0.35])
@@ -44,10 +51,16 @@ class Scenario(BaseScenario):
         for i, landmark in enumerate(world.landmarks):
             landmark.color = np.array([0.25, 0.25, 0.25])
         # set random initial states
-        for agent in world.agents:
-            agent.state.p_pos = np.random.uniform(-3, +3, world.dim_p)
-            agent.state.p_vel = np.zeros(world.dim_p)
-            agent.state.c = np.zeros(world.dim_c)
+        if start_poses is None:
+            for agent in world.agents:
+                agent.state.p_pos = np.random.uniform(-3, +3, world.dim_p)
+                agent.state.p_vel = np.zeros(world.dim_p)
+                agent.state.c = np.zeros(world.dim_c)
+        else:
+            for i, agent in enumerate(world.agents):
+                agent.state.p_pos = np.array(start_poses[i])
+                agent.state.p_vel = np.zeros(world.dim_p)
+                agent.state.c = np.zeros(world.dim_c)
         for i, landmark in enumerate(world.landmarks):
             if not landmark.boundary:
                 landmark.state.p_pos = np.random.uniform(-1.5, +1.5, world.dim_p)
@@ -72,6 +85,24 @@ class Scenario(BaseScenario):
         dist_min = agent1.size + agent2.size
         return True if dist < dist_min else False
 
+    def is_wall_collision(self, wall, agent):
+        if agent.ghost and not wall.hard:
+            return False  # ghost passes through soft walls
+        if wall.orient == 'H':
+            prll_dim = 0
+            perp_dim = 1
+        else:
+            prll_dim = 1
+            perp_dim = 0
+        ent_pos = agent.state.p_pos
+        if (ent_pos[prll_dim] < wall.endpoints[0] - agent.size or
+            ent_pos[prll_dim] > wall.endpoints[1] + agent.size):
+            return False  # agent is beyond endpoints of wall
+        if (ent_pos[perp_dim] > wall.axis_pos + agent.size or
+            ent_pos[perp_dim] < wall.axis_pos - agent.size):
+            return False
+        return True
+
     # return all agents that are not adversaries
     def good_agents(self, world):
         return [agent for agent in world.agents if not agent.adversary]
@@ -95,16 +126,19 @@ class Scenario(BaseScenario):
             for adv in adversaries:
                 rew += 0.1 * np.sqrt(np.sum(np.square(agent.state.p_pos - adv.state.p_pos)))
         if agent.collide:
-            for a in adversaries:
-                if self.is_collision(a, agent):
-                    rew -= 10
+            # for a in adversaries:
+                # if self.is_collision(a, agent):
+                    # rew -= 10
+            for w in world.walls:
+                if self.is_wall_collision(w, agent):
+                    rew -= 0.25
 
         # agents are penalized for exiting the screen, so that they can be caught by the adversaries
         def bound(x):
-            if x < 0.9:
+            if x < 2.7:
                 return 0
-            if x < 1.0:
-                return (x - 0.9) * 10
+            if x < 3.0:
+                return (x - 2.7) * 10
             return min(np.exp(2 * x - 2), 10)
         for p in range(world.dim_p):
             x = abs(agent.state.p_pos[p])
@@ -122,10 +156,13 @@ class Scenario(BaseScenario):
             for adv in adversaries:
                 rew -= 0.1 * min([np.sqrt(np.sum(np.square(a.state.p_pos - adv.state.p_pos))) for a in agents])
         if agent.collide:
-            for ag in agents:
-                for adv in adversaries:
-                    if self.is_collision(ag, adv):
-                        rew += 10
+            # for ag in agents:
+                # for adv in adversaries:
+                    # if self.is_collision(ag, adv):
+                        # rew += 10
+            for w in world.walls:
+                if self.is_wall_collision(w, agent):
+                    rew -= 0.25
         return rew
 
     def observation(self, agent, world):
