@@ -296,12 +296,18 @@ class MultiAgentEnv(gym.Env):
         for i in range(len(self.viewers)):
             from multiagent import rendering
             # update bounds to center around agent
-            cam_range = 3
-            if self.shared_viewer:
-                pos = np.zeros(self.world.dim_p)
-            else:
-                pos = self.agents[i].state.p_pos
-            self.viewers[i].set_bounds(pos[0]-cam_range,pos[0]+cam_range,pos[1]-cam_range,pos[1]+cam_range)
+            # cam_range = 3
+            # if self.shared_viewer:
+            #     pos = np.zeros(self.world.dim_p)
+            # else:
+            #     pos = self.agents[i].state.p_pos
+            # self.viewers[i].set_bounds(pos[0]-cam_range,pos[0]+cam_range,pos[1]-cam_range,pos[1]+cam_range)
+            # use custom cam range
+            x_min = -8
+            x_max = 8
+            y_min = -8
+            y_max = 8
+            self.viewers[i].set_bounds(x_min, x_max, y_min, y_max)
             # update geometry positions
             for e, entity in enumerate(self.world.entities):
                 self.render_geoms_xform[e].set_translation(*entity.state.p_pos)
