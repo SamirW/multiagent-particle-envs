@@ -63,7 +63,7 @@ class Scenario(BaseScenario):
                 [np.random.uniform(-7.5, +7.5), np.random.uniform(-2.5, 2.5)])
             landmark.state.p_vel = np.zeros(world.dim_p)
         for (l1, l2) in itertools.permutations(world.landmarks, 2):
-            if np.linalg.norm(l1.state.p_pos - l2.state.p_pos) < 2.5:
+            if np.linalg.norm(l1.state.p_pos - l2.state.p_pos) < 4.5:
                 self.reset_world(world, flip=flip, start_poses=start_poses)
 
     def benchmark_data(self, agent, world):
@@ -104,6 +104,9 @@ class Scenario(BaseScenario):
         if (ent_pos[prll_dim] < wall.endpoints[0] - agent.size or
                 ent_pos[prll_dim] > wall.endpoints[1] + agent.size):
             return False  # agent is beyond endpoints of wall
+        if (ent_pos[perp_dim] > wall.axis_pos + agent.size or
+                ent_pos[perp_dim] < wall.axis_pos - agent.size):
+            return False
         return True
 
     def reward(self, agent, world):
