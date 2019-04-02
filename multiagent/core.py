@@ -236,10 +236,23 @@ class World(object):
                         p_force[a] = p_force[a] + wf
         return p_force
 
+    def check_all_agent_in_contact(self, box):
+        all_contact = True
+        contact_threshold = 0.005
+
+        for i, agent in enumerate(self.agents):
+            [f_a, f_b] = self.get_collision_force(agent, box)
+            if abs(f_a[0]) < contact_threshold:
+                all_contact = False
+
+        return all_contact
+
     # integrate physical state
     def integrate_state(self, p_force):
         for i,entity in enumerate(self.entities):
             if not entity.movable: continue
+            if "box" in entity.name and not self.check_all_agent_in_contact(entity):
+                continue
             entity.state.p_vel = entity.state.p_vel * (1 - self.damping)
             if (p_force[i] is not None):
                 accel = np.copy(p_force[i]) / entity.mass
@@ -259,6 +272,25 @@ class World(object):
         else:
             noise = np.random.randn(*agent.action.c.shape) * agent.c_noise if agent.c_noise else 0.0
             agent.state.c = agent.action.c + noise      
+
+    # get collision forces for any contact between two entities
+    def get_collision_force(self, entity_a, entity_b):
+        if (not entity_a.collide) or (not entity_b.collide):
+            return [None, None] # not a collider
+        if (entity_a is entity_b):
+            return [None, None] # don't collide against itself
+        # compute actual distance between entities
+        delta_pos = entity_a.state.p_pos - entity_b.state.p_pos
+        dist = np.sqrt(np.sum(np.square(delta_pos)))
+        # minimum allowable distance
+        dist_min = entity_a.size + entity_b.size
+        # softmax penetration
+        k = self.contact_margin
+        penetration = np.logaddexp(0, -(dist - dist_min)/k)*k
+        force = self.contact_force * delta_pos / dist * penetration
+        force_a = +force if entity_a.movable else None
+        force_b = -force if entity_b.movable else None
+        return [force_a, force_b]
 
     # get collision forces for any contact between two entities
     def get_entity_collision_force(self, ia, ib):
