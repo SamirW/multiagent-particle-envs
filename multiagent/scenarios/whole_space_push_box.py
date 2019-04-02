@@ -6,51 +6,44 @@ walls = [
     ['V', -8, (-3.2, 3.2), 0.05],
     ['V', 8, (-3.2, 3.2), 0.05],
     ['H', -3.2, (-8, 8), 0.05],
-    ['H', 3.2, (-8, 8), 0.05]]
-
+    ['H', 3.2, (-8, 8), 0.05],
+    ['V', 0, (-3.2, 3.2), 0.05]]
+    # ['V', -1, (-3.2, 3.2), 0.05],
+    # ['V', 1, (-3.2, 3.2), 0.05]]
 
 class Scenario(BaseScenario):
 
     def make_world(self, mode=0):
         """
         mode0:
-        - Random agent loc
-        - Box starts at left side
-        - Target at right side
+        - Single goal start
 
         mode1:
-        - Random agent loc
-        - Box starts at right side
-        - Target at left side
-
-        mode2:
-        - Random agent loc
-        - Box at center
-        - Target at random
+        - Random goal start
         """
         assert mode >= 0
-        assert mode <= 2
+        assert mode <= 1
         self.mode = mode
 
         world = World()
 
         # add agents
-        world.agents = [Agent() for i in range(2)]
+        world.agents = [Agent() for i in range(4)]
         for i, agent in enumerate(world.agents):
             agent.name = 'agent %d' % i
             agent.collide = True
             agent.silent = True
-            agent.size = 0.10
+            agent.size = 0.75
             agent.i = i
 
         # add boxes
-        n_box = 1  # One box and pushing to left
+        n_box = 2  # two boxes
         self.boxes = [Landmark() for _ in range(n_box)]
         for i, box in enumerate(self.boxes):
             box.name = 'box %d' % i
             box.collide = True
             box.movable = True
-            box.size = 0.25
+            box.size = 1.25
             box.initial_mass = 2.
             box.index = i
             world.landmarks.append(box)
@@ -61,7 +54,7 @@ class Scenario(BaseScenario):
             target.name = 'target %d' % i
             target.collide = False
             target.movable = False
-            target.size = 0.05
+            target.size = 0.15
             target.index = i
             world.landmarks.append(target)
 
@@ -78,17 +71,29 @@ class Scenario(BaseScenario):
     def reset_world(self, world, flip=False):
         # random properties for agents
         for i, agent in enumerate(world.agents):
-            if self.mode == 0:
+            if i <= 1:
                 agent.color = np.array([0.85, 0.35, 0.35])
-            elif self.mode == 1:
+            else:
                 agent.color = np.array([0.35, 0.35, 0.85])
-            elif self.mode == 2:
-                if i == 0:
-                    agent.color = np.array([0.85, 0.35, 0.35])
-                else:
-                    agent.color = np.array([0.35, 0.35, 0.85])
 
-            agent.state.p_pos = np.random.uniform(-1, +1, world.dim_p)
+            if self.mode == 0:
+                if i == 0:
+                    agent.state.p_pos = np.array([-4, 2.25])
+                elif i == 1:
+                    agent.state.p_pos = np.array([-4, -2.25])
+                elif i == 2:
+                    agent.state.p_pos = np.array([4, 2.25])
+                elif i == 3:
+                    agent.state.p_pos = np.array([4, -2.25])
+            else:
+                if i == 0:
+                    agent.state.p_pos = np.array([-4, 2.25])
+                elif i == 1:
+                    agent.state.p_pos = np.array([4, 2.25])
+                elif i == 2:
+                    agent.state.p_pos = np.array([-4, -2.25])
+                elif i == 3:
+                    agent.state.p_pos = np.array([4, -2.25])
             agent.state.p_vel = np.zeros(world.dim_p)
             agent.state.c = np.zeros(world.dim_c)
 
@@ -97,57 +102,35 @@ class Scenario(BaseScenario):
             landmark.color = np.array([0.25, 0.25, 0.25])
             landmark.state.p_vel = np.zeros(world.dim_p)
 
-            if "box" in landmark.name and landmark.index == 0:
-                landmark.state.p_pos = np.array([0., 0.])
-            elif "target" in landmark.name and landmark.index == 0:
+            if "box" in landmark.name:
+                if landmark.index == 0:
+                    landmark.state.p_pos = np.array([-4, 0.])
+                else:
+                    landmark.state.p_pos = np.array([4., 0.])
+            elif "target" in landmark.name:
                 if self.mode == 0:
-                    landmark.state.p_pos = np.array([-0.85, 0.])
-                elif self.mode == 1:
-                    landmark.state.p_pos = np.array([0.85, 0.])
-                elif self.mode == 2:
-                    option = np.random.randint(low=0, high=2)
+                    flip = 0
+                else:
+                    flip = np.random.randint(2)
 
-                    if option == 0:
-                        landmark.state.p_pos = np.array([-0.85, 0.])
-                    elif option == 1:
-                        landmark.state.p_pos = np.array([0.85, 0.])
-                    elif option == 2:
-                        landmark.state.p_pos = np.array([-0.60, -0.60])
-                    else:
-                        raise ValueError()
-
-                    # if option == 0:
-                    #     landmark.state.p_pos = np.array([-0.85, 0.85])
-                    # elif option == 1:
-                    #     landmark.state.p_pos = np.array([-0.85, 0.])
-                    # elif option == 2:
-                    #     landmark.state.p_pos = np.array([-0.85, -0.85])
-                    # elif option == 3:
-                    #     landmark.state.p_pos = np.array([0.85, 0.85])
-                    # elif option == 4:
-                    #     landmark.state.p_pos = np.array([0.85, 0.])
-                    # elif option == 5:
-                    #     landmark.state.p_pos = np.array([0.85, -0.85])
-                    # else:
-                    #     raise ValueError()
+                if landmark.index == flip:
+                    landmark.state.p_pos = np.array([-7, 0.])
+                else:
+                    landmark.state.p_pos = np.array([7, 0.])
             else:
                 raise ValueError()
 
         self.timestep = 0.
 
     def reward(self, agent, world):
-        for i, landmark in enumerate(world.landmarks):
-            if "box" in landmark.name and landmark.index == 0:
-                box0 = landmark
-            elif "target" in landmark.name and landmark.index == 0:
-                target0 = landmark
-            else:
-                raise ValueError()
+        rew = 0
 
-        # Move box0 to target0 (One Box)
-        dist = np.sum(np.square(box0.state.p_pos - target0.state.p_pos))
+        for box, target in zip(world.boxes, world.targets):
+            # Move box to target (per box target pair)
+            dist = np.sum(np.square(box.state.p_pos - target.state.p_pos))
+            rew -= dist
 
-        return -dist
+        return rew
 
     def observation(self, agent, world):
         if agent.i == 0:
