@@ -41,14 +41,16 @@ class Scenario(BaseScenario):
     def reset_world(self, world, flip=False, start_poses=None, goal_poses=None):
         # random properties for agents
         for i, agent in enumerate(world.agents):
-            if i == 0:
-                agent.color = np.array([0.35, 0.35, 0.85])
-            elif i == 1:
+            # if i == 0:
+            if i <= 1:
                 agent.color = np.array([0.85, 0.35, 0.35])
-            elif i == 2:
-                agent.color = np.array([0.35, 0.85, 0.35])
+            # elif i == 1:
             else:
-                agent.color = np.array([0.85, 0.85, 0.85])
+                agent.color = np.array([0.35, 0.35, 0.85])
+            # elif i == 2:
+            #     agent.color = np.array([0.35, 0.85, 0.35])
+            # else:
+                # agent.color = np.array([0.85, 0.85, 0.85])
         # random properties for landmarks
         for i, landmark in enumerate(world.landmarks):
             if i == 0:
@@ -77,7 +79,7 @@ class Scenario(BaseScenario):
                 landmark.state.p_vel = np.zeros(world.dim_p)
         else:
             for i, landmark in enumerate(world.landmarks):
-                landmark.state.p_pos = np.array(end_poses[i])
+                landmark.state.p_pos = np.array(goal_poses[i])
         for (l1, l2) in itertools.permutations(world.landmarks, 2):
             if np.linalg.norm(l1.state.p_pos - l2.state.p_pos) < 4.5:
                 self.reset_world(world, flip=flip, start_poses=start_poses)
