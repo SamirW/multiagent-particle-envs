@@ -108,12 +108,12 @@ class MultiAgentEnv(gym.Env):
             self.post_step_callback(self.world)
         return obs_n, reward_n, done_n, info_n
 
-    def _reset(self, flip=False, start_poses=None):
+    def _reset(self, flip=False, start_poses=None, goal_poses=None):
         # reset world
         if start_poses is None:
             self.reset_callback(self.world, flip=flip)
         else:
-            self.reset_callback(self.world, flip=flip, start_poses=start_poses)
+            self.reset_callback(self.world, flip=flip, start_poses=start_poses, goal_poses=goal_poses)
         # reset renderer
         self._reset_render()
         # record observations for each agent
@@ -245,30 +245,33 @@ class MultiAgentEnv(gym.Env):
             self.render_geoms_xform = []
             self.comm_geoms = []
             for entity in self.world.entities:
-                geom = rendering.make_circle(entity.size)
-                xform = rendering.Transform()
-                entity_comm_geoms = []
-                if 'agent' in entity.name:
-                    geom.set_color(*entity.color, alpha=0.5)
-                    if not entity.silent:
-                        dim_c = self.world.dim_c
-                        # make circles to represent communication
-                        for ci in range(dim_c):
-                            comm = rendering.make_circle(entity.size / dim_c)
-                            comm.set_color(1, 1, 1)
-                            comm.add_attr(xform)
-                            offset = rendering.Transform()
-                            comm_size = (entity.size / dim_c)
-                            offset.set_translation(ci * comm_size * 2 -
-                                                   entity.size + comm_size, 0)
-                            comm.add_attr(offset)
-                            entity_comm_geoms.append(comm)
+                if not 'landmark' in entity.name:
+                    geom = rendering.make_circle(entity.size)
+                    xform = rendering.Transform()
+                    entity_comm_geoms = []
+                    if 'agent' in entity.name:
+                        geom.set_color(*entity.color, alpha=0.5)
+                        if not entity.silent:
+                            dim_c = self.world.dim_c
+                            # make circles to represent communication
+                            for ci in range(dim_c):
+                                comm = rendering.make_circle(entity.size / dim_c)
+                                comm.set_color(1, 1, 1)
+                                comm.add_attr(xform)
+                                offset = rendering.Transform()
+                                comm_size = (entity.size / dim_c)
+                                offset.set_translation(ci * comm_size * 2 -
+                                                       entity.size + comm_size, 0)
+                                comm.add_attr(offset)
+                                entity_comm_geoms.append(comm)
+                    else:
+                        geom.set_color(*entity.color)
+                    geom.add_attr(xform)
+                    self.render_geoms.append(geom)
+                    self.render_geoms_xform.append(xform)
+                    self.comm_geoms.append(entity_comm_geoms)
                 else:
-                    geom.set_color(*entity.color)
-                geom.add_attr(xform)
-                self.render_geoms.append(geom)
-                self.render_geoms_xform.append(xform)
-                self.comm_geoms.append(entity_comm_geoms)
+                    pass
             for wall in self.world.walls:
                 corners = ((wall.axis_pos - 0.5 * wall.width, wall.endpoints[0]),
                            (wall.axis_pos - 0.5 * wall.width, wall.endpoints[1]),
@@ -310,15 +313,16 @@ class MultiAgentEnv(gym.Env):
             self.viewers[i].set_bounds(x_min, x_max, y_min, y_max)
             # update geometry positions
             for e, entity in enumerate(self.world.entities):
-                self.render_geoms_xform[e].set_translation(*entity.state.p_pos)
-                if 'agent' in entity.name:
-                    self.render_geoms[e].set_color(*entity.color, alpha=0.5)
-                    if not entity.silent:
-                        for ci in range(self.world.dim_c):
-                            color = 1 - entity.state.c[ci]
-                            self.comm_geoms[e][ci].set_color(color, color, color)
-                else:
-                    self.render_geoms[e].set_color(*entity.color)
+                if not 'landmark' in entity.name:
+                    self.render_geoms_xform[e].set_translation(*entity.state.p_pos)
+                    if 'agent' in entity.name:
+                        self.render_geoms[e].set_color(*entity.color, alpha=0.5)
+                        if not entity.silent:
+                            for ci in range(self.world.dim_c):
+                                color = 1 - entity.state.c[ci]
+                                self.comm_geoms[e][ci].set_color(color, color, color)
+                    else:
+                        self.render_geoms[e].set_color(*entity.color)
             # render to display or array
             results.append(self.viewers[i].render(return_rgb_array = mode=='rgb_array'))
 

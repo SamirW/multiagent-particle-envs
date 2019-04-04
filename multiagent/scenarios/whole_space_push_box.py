@@ -68,7 +68,7 @@ class Scenario(BaseScenario):
 
         return world
 
-    def reset_world(self, world, flip=False):
+    def reset_world(self, world, flip=False, start_poses=None, goal_poses=None):
         # random properties for agents
         for i, agent in enumerate(world.agents):
             if i <= 1:
@@ -76,24 +76,28 @@ class Scenario(BaseScenario):
             else:
                 agent.color = np.array([0.35, 0.35, 0.85])
 
-            if self.mode == 0:
-                if i == 0:
-                    agent.state.p_pos = np.array([-4, 2.25])
-                elif i == 1:
-                    agent.state.p_pos = np.array([-4, -2.25])
-                elif i == 2:
-                    agent.state.p_pos = np.array([4, 2.25])
-                elif i == 3:
-                    agent.state.p_pos = np.array([4, -2.25])
+            if start_poses is None:
+                if self.mode == 0:
+                    if i == 0:
+                        agent.state.p_pos = np.array([-4, 2.25])
+                    elif i == 1:
+                        agent.state.p_pos = np.array([-4, -2.25])
+                    elif i == 2:
+                        agent.state.p_pos = np.array([4, 2.25])
+                    elif i == 3:
+                        agent.state.p_pos = np.array([4, -2.25])
+                else:
+                    if i == 0:
+                        agent.state.p_pos = np.array([-4, 2.25])
+                    elif i == 1:
+                        agent.state.p_pos = np.array([4, 2.25])
+                    elif i == 2:
+                        agent.state.p_pos = np.array([-4, -2.25])
+                    elif i == 3:
+                        agent.state.p_pos = np.array([4, -2.25])
             else:
-                if i == 0:
-                    agent.state.p_pos = np.array([-4, 2.25])
-                elif i == 1:
-                    agent.state.p_pos = np.array([4, 2.25])
-                elif i == 2:
-                    agent.state.p_pos = np.array([-4, -2.25])
-                elif i == 3:
-                    agent.state.p_pos = np.array([4, -2.25])
+                for i, agent in enumerate(world.agents):
+                    agent.state.p_pos = np.array(start_poses[i])
             agent.state.p_vel = np.zeros(world.dim_p)
             agent.state.c = np.zeros(world.dim_c)
 
@@ -108,15 +112,18 @@ class Scenario(BaseScenario):
                 else:
                     landmark.state.p_pos = np.array([4., 0.])
             elif "target" in landmark.name:
-                if self.mode == 0:
-                    flip = 0
-                else:
-                    flip = np.random.randint(2)
+                if goal_poses is None:
+                    if self.mode == 0:
+                        flip = 0
+                    else:
+                        flip = np.random.randint(2)
 
-                if landmark.index == flip:
-                    landmark.state.p_pos = np.array([-7, 0.])
+                    if landmark.index == flip:
+                        landmark.state.p_pos = np.array([-7, 0.])
+                    else:
+                        landmark.state.p_pos = np.array([7, 0.])
                 else:
-                    landmark.state.p_pos = np.array([7, 0.])
+                    landmark.state.p_pos = np.array(goal_poses[landmark.index])
             else:
                 raise ValueError()
 
