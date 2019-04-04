@@ -136,7 +136,8 @@ class World(object):
         self.dim_color = 3
         # simulation timestep
         # self.dt = 0.1
-        self.dt = 0.015
+        # self.dt = 0.015
+        self.dt = 0.03
         # physical damping
         # self.damping = 0.25
         self.damping = 0.14
@@ -148,7 +149,7 @@ class World(object):
         self.cached_dist_vect = None
         self.cached_dist_mag = None
         # constraints
-        self.max_accel = 2.5
+        self.max_accel = 1.5
 
     @property
     def boxes(self):
