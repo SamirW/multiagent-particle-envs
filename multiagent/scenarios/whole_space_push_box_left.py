@@ -77,9 +77,9 @@ class Scenario(BaseScenario):
             if start_poses is None:
                 if self.mode == 0:
                     if i == flip:
-                        agent.state.p_pos = np.array([np.random.uniform(-4.5, -3.5), np.random.uniform(2, 2.5)])
+                        agent.state.p_pos = np.array([np.random.uniform(-4.25, -3.5), np.random.uniform(2, 2.25)])
                     else:
-                        agent.state.p_pos = np.array([np.random.uniform(-4.5, -3.5), np.random.uniform(-2.5, -2)])
+                        agent.state.p_pos = np.array([np.random.uniform(-4.25, -3.5), np.random.uniform(-2.25, -2)])
                 else:
                     pass
             else:
