@@ -71,7 +71,7 @@ class Scenario(BaseScenario):
                 if np.linalg.norm(l1.state.p_pos - l2.state.p_pos) < 3:
                     self.reset_world(world, flip=flip, start_poses=start_poses)
         else:
-            for i, agent in enumerate(world.landmarks):
+            for i, landmark in enumerate(world.landmarks):
                 landmark.state.p_pos = np.array(goal_poses[i])
 
     def benchmark_data(self, agent, world):

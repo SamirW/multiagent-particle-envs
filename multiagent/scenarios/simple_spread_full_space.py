@@ -38,7 +38,7 @@ class Scenario(BaseScenario):
         self.reset_world(world)
         return world
 
-    def reset_world(self, world, flip=False, start_poses=None):
+    def reset_world(self, world, flip=False, start_poses=None, goal_poses=None):
         # random properties for agents
         for i, agent in enumerate(world.agents):
             if i == 0:

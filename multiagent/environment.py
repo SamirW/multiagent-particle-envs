@@ -245,7 +245,7 @@ class MultiAgentEnv(gym.Env):
             self.render_geoms_xform = []
             self.comm_geoms = []
             for entity in self.world.entities:
-                if not 'landmark' in entity.name:
+                if not 'landmark123' in entity.name:
                     geom = rendering.make_circle(entity.size)
                     xform = rendering.Transform()
                     entity_comm_geoms = []
@@ -313,7 +313,7 @@ class MultiAgentEnv(gym.Env):
             self.viewers[i].set_bounds(x_min, x_max, y_min, y_max)
             # update geometry positions
             for e, entity in enumerate(self.world.entities):
-                if not 'landmark' in entity.name:
+                if not 'landmark123' in entity.name:
                     self.render_geoms_xform[e].set_translation(*entity.state.p_pos)
                     if 'agent' in entity.name:
                         self.render_geoms[e].set_color(*entity.color, alpha=0.5)
