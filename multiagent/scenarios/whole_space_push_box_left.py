@@ -68,7 +68,7 @@ class Scenario(BaseScenario):
 
         return world
 
-    def reset_world(self, world, flip=False, start_poses=None, goal_poses=None):
+    def reset_world(self, world, flip=False, start_poses=None, goal_poses=None, start_vels=None):
         # random properties for agents
         flip = np.random.randint(2)
         for i, agent in enumerate(world.agents):

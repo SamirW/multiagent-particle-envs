@@ -38,7 +38,7 @@ class Scenario(BaseScenario):
         self.reset_world(world)
         return world
 
-    def reset_world(self, world, flip=False, start_poses=None, goal_poses=None):
+    def reset_world(self, world, flip=False, start_poses=None, goal_poses=None, start_vels=None):
         # random properties for agents
         for i, agent in enumerate(world.agents):
             if i == 0:
@@ -69,6 +69,10 @@ class Scenario(BaseScenario):
         else:
             for i, agent in enumerate(world.agents):
                 agent.state.p_pos = np.array(start_poses[i])
+                if start_vels is None:
+                    agent.state.p_vel = np.zeros(world.dim_p)
+                else:
+                    agent.state.p_vel = np.array(start_vels[i])
         if goal_poses is None:
             for i, landmark in enumerate(world.landmarks):
                 landmark.state.p_pos = np.array(

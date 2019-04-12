@@ -108,12 +108,12 @@ class MultiAgentEnv(gym.Env):
             self.post_step_callback(self.world)
         return obs_n, reward_n, done_n, info_n
 
-    def _reset(self, flip=False, start_poses=None, goal_poses=None):
+    def _reset(self, flip=False, start_poses=None, goal_poses=None, start_vels=None):
         # reset world
         if start_poses is None:
             self.reset_callback(self.world, flip=flip)
         else:
-            self.reset_callback(self.world, flip=flip, start_poses=start_poses, goal_poses=goal_poses)
+            self.reset_callback(self.world, flip=flip, start_poses=start_poses, goal_poses=goal_poses, start_vels=start_vels)
         # reset renderer
         self._reset_render()
         # record observations for each agent
