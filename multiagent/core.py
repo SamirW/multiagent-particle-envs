@@ -137,7 +137,7 @@ class World(object):
         # simulation timestep
         # self.dt = 0.1
         # self.dt = 0.015
-        self.dt = 0.03
+        self.dt = 0.025
         # physical damping
         # self.damping = 0.25
         self.damping = 0.14
