@@ -8,8 +8,8 @@ class Scenario(BaseScenario):
         world = World()
         # set any world properties first
         world.dim_c = 2
-        num_agents = 2
-        num_landmarks = 2
+        num_agents = 6
+        num_landmarks = 6
 
         # add agents
         world.agents = [Agent() for i in range(num_agents)]
@@ -17,7 +17,7 @@ class Scenario(BaseScenario):
             agent.name = 'agent %d' % i
             agent.collide = True
             agent.silent = True
-            agent.size = 0.15
+            agent.size = 0.05
             agent.index = i
 
         # add landmarks
@@ -86,7 +86,7 @@ class Scenario(BaseScenario):
             for a in world.agents:
                 if self.is_collision(a, agent):
                     rew -= 1
-        return rew/len(world.agents)
+        return rew/float(len(world.agents))
 
     def observation(self, agent, world):
         if agent.index == 0:
